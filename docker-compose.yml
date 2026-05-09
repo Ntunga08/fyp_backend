@@ -1,26 +1,30 @@
 services:
   db:
-    image: postgres:16-alpine #Use official PostgreSQL image (lightweight version)
-    restart: unless-stopped   #Automatically restart the container unless it is explicitly stopped
+    image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres 
       POSTGRES_PASSWORD: postgres 
       POSTGRES_DB: edutrack
     ports:
-      - "5432:5432"  #Map the container's PostgreSQL port to the host machine's port
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data #Persist database data using a named volume
+      - pgdata:/var/lib/postgresql/data
 
   backend:
     build: .
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/edutrack
+      JWT_SECRET: "0d36cbd7231efdde5809df711e4ea4c5544d3ccd32bc8d43bb907fa0189cd3b8"
+      SCHOOL_LAT: -6.771246975220776
+      SCHOOL_LNG: 39.2405926971738
+      SCHOOL_RADIUS_METERS: 2000
     depends_on:
       - db
     ports:
-      - "3000:3000" #Map the container's application port to the host machine's port
-    command: pnpm exec tsx watch src/index.ts
+      - "3000:3000"
+    command: pnpm exec tsx server.ts
 
 volumes:
-  pgdata: #Define a named volume for PostgreSQL data persistence
+  pgdata:

@@ -1,0 +1,43 @@
+
+# Dependencies — Docker installs these fresh inside the container
+node_modules
+.pnpm-store
+
+# Environment files — NEVER copy these into the image
+# Pass secrets via docker-compose environment: block instead
+.env
+.env.*
+!.env.example
+
+# Prisma migrations lock (let container generate fresh)
+# prisma/migrations  ← keep this commented, you DO want migrations copied in
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# TypeScript build output (not needed — tsx runs .ts directly)
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor config
+.vscode/
+.idea/
+
+# Docker files themselves (no need to copy into image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__/

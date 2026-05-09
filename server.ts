@@ -5,13 +5,10 @@ import env from "./src/config/env";
 
 async function main() {
   try {
-    // ── Test database connection ─────────────────────────────────────────────
-    // $queryRaw sends a simple "SELECT 1" to PostgreSQL.
-    // If it fails, Prisma throws and we catch it below.
     await prisma.$queryRaw`SELECT 1`;
     console.log("✅ Database connected — PostgreSQL is reachable");
 
-    // ── Start HTTP server ────────────────────────────────────────────────────
+    // Start HTTP server 
     app.listen(env.PORT, () => {
       console.log(`EduTrack server running on http://localhost:${env.PORT}`);
       console.log(`Environment: ${env.NODE_ENV}`);
@@ -25,9 +22,6 @@ async function main() {
   }
 }
 
-// ── Graceful Shutdown
-// When you stop the server (Ctrl+C), disconnect Prisma cleanly
-// so no connections are left hanging in PostgreSQL
 process.on("SIGINT", async () => {
   await prisma.$disconnect();
   console.log("\n Prisma disconnected. Server stopped.");

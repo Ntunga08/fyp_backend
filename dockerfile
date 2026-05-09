@@ -1,29 +1,30 @@
-# Node.js version 20 installed
-# alpine → ultra-light Linux version
+
 FROM node:20-alpine
 
+# Install pnpm globally
+RUN npm install -g pnpm
 
-# Create app directory
+# Set working directory inside the container
 WORKDIR /app
 
-#enable  package management tools  like  pnpm and yarn
-RUN corepack enable
-
-#copies dependency files to the working directory
+# Copy dependency files first (better Docker layer caching)
+# If these files don't change, Docker reuses the cached layer
 COPY package.json pnpm-lock.yaml ./
 
-# install all dependencies in a containerized environment,
-# ensuring that the exact versions specified in the lockfile are used,
-# which promotes consistency across different environments and prevents issues
-# related to version mismatches.
+# Install all dependencies
+RUN pnpm install
 
+# Copy prisma schema before generating client
+COPY prisma ./prisma
 
-RUN pnpm install --frozen-lockfile
+# Generate Prisma client (must run after node_modules are installed)
+RUN pnpm exec prisma generate
 
-#copy the  rest of  the application code to the working directory in the container
+# Copy the rest of the source code
 COPY . .
 
-#expose port 3000 to allow external access to the application running inside the container.
+# Expose the port your Express server listens on
 EXPOSE 3000
 
-CMD ["pnpm", "exec", "tsx", "watch", "src/index.ts"]
+# Start the server using tsx (runs TypeScript directly — no compile step needed)
+CMD ["pnpm", "exec", "tsx", "src/server.ts"]

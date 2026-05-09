@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  PRINCIPAL
+  ADMIN
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum LessonStatus {
+  CONDUCTED
+  MISSED
+  SUBSTITUTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum FaceVerificationStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  timetables Timetable[]
+  attendances Attendance[]
+  lessons Lesson[]
+  substitutesAsOriginal Substitute[] @relation("OriginalTeacher")
+  substitutesAsCover Substitute[] @relation("SubstituteTeacher")
+  faceVerifications FaceVerification[]
+
+  @@map("users")
+}
+
+model Timetable {
+  id        Int      @id @default(autoincrement())
+  teacherId Int
+  subject   String
+  class     String
+  day       Day
+  timeSlot  String
+  room      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@map("timetable")
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  teacherId Int
+  date      DateTime         @db.Date
+  timeIn    DateTime
+  latitude  Float
+  longitude Float
+  status    AttendanceStatus @default(PRESENT)
+  createdAt DateTime @default(now())
+
+  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, date])
+  @@map("attendance")
+}
+
+model Lesson {
+  id          Int          @id @default(autoincrement())
+  teacherId   Int
+  timetableId Int
+  date        DateTime     @db.Date
+  status      LessonStatus @default(CONDUCTED)
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  timetable Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+
+  substitute Substitute?
+  faceVerification FaceVerification?
+
+  @@unique([timetableId, date])
+  @@map("lessons")
+}
+
+model Substitute {
+  id                  Int      @id @default(autoincrement())
+  originalTeacherId   Int
+  substituteTeacherId Int
+  lessonId            Int      @unique
+  date                DateTime @db.Date
+  reason              String?
+  createdAt           DateTime @default(now())
+
+  originalTeacher   User   @relation("OriginalTeacher", fields: [originalTeacherId], references: [id])
+  substituteTeacher User   @relation("SubstituteTeacher", fields: [substituteTeacherId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("substitutes")
+}
+
+model FaceVerification {
+  id         Int                    @id @default(autoincrement())
+  teacherId  Int
+  lessonId   Int                    @unique
+  status     FaceVerificationStatus @default(PENDING)
+  verifiedAt DateTime?
+  createdAt  DateTime               @default(now())
+
+  teacher User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("face_verifications")
+}

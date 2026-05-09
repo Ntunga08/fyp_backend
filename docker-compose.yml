@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine #Use official PostgreSQL image (lightweight version)
+    restart: unless-stopped   #Automatically restart the container unless it is explicitly stopped
+    environment:
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: postgres 
+      POSTGRES_DB: edutrack
+    ports:
+      - "5432:5432"  #Map the container's PostgreSQL port to the host machine's port
+    volumes:
+      - pgdata:/var/lib/postgresql/data #Persist database data using a named volume
+
+  backend:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/edutrack
+    depends_on:
+      - db
+    ports:
+      - "3000:3000" #Map the container's application port to the host machine's port
+    command: pnpm exec tsx watch src/index.ts
+
+volumes:
+  pgdata: #Define a named volume for PostgreSQL data persistence

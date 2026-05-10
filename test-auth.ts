@@ -1,6 +1,6 @@
 import http from 'http'
 
-const BASE_URL = 'http://localhost:3000'
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
 
 interface TestResult {
   name: string
@@ -66,7 +66,7 @@ async function testRegister() {
       name: 'John Doe',
       email: `test-${Date.now()}@example.com`,
       password: 'Password@123',
-      role: 'STUDENT',
+      role: 'TEACHER',
       phone: '+1234567890',
     })
 
@@ -77,7 +77,7 @@ async function testRegister() {
         message: 'User created successfully',
         data: response.data.data,
       })
-      return response.data.data
+      return response.data.data.user
     } else {
       results.push({
         name: '❌ Register User',

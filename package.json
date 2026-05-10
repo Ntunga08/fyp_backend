@@ -5,7 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "pnpm exec tsx server.ts",
+    "test": "pnpm exec tsx test-auth.ts"
   },
   "keywords": [],
   "author": "",

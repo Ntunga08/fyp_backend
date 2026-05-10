@@ -5,7 +5,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 // Routes (uncomment as you build each one)
-import authRoutes from "./src/routes/auth.route";
+import authRoutes from "./src/routes/auth.route.js";
 // import attendanceRoutes from "./routes/attendance.routes";
 // import timetableRoutes  from "./routes/timetable.routes";
 // import lessonRoutes     from "./routes/lesson.routes";

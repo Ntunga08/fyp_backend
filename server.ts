@@ -1,8 +1,8 @@
 
 
-import app from "./app";
-import prisma from "./src/config/prisma";
-import env from "./src/config/env";
+import app from "./app.js";
+import prisma from "./src/config/prisma.js";
+import env from "./src/config/env.js";
 
 import dotenv from "dotenv";
 dotenv.config();

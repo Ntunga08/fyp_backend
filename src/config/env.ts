@@ -24,12 +24,12 @@ const env = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "24h",
 
   // School geolocation — used in geo.middleware.ts
-  SCHOOL_LAT: parseFloat(required("SCHOOL_LAT")),
-  SCHOOL_LNG: parseFloat(required("SCHOOL_LNG")),
-  SCHOOL_RADIUS_METERS: parseInt(
-    process.env.SCHOOL_RADIUS_METERS || "200",
-    10
-  ),
+//   SCHOOL_LAT: parseFloat(required("SCHOOL_LAT")),
+//   SCHOOL_LNG: parseFloat(required("SCHOOL_LNG")),
+//   SCHOOL_RADIUS_METERS: parseInt(
+//     process.env.SCHOOL_RADIUS_METERS || "200",
+//     10
+//   ),
 };
 
 export default env;

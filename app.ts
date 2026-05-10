@@ -5,7 +5,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 // Routes (uncomment as you build each one)
-// import authRoutes       from "./routes/auth.routes";
+import authRoutes from "./src/routes/auth.route";
 // import attendanceRoutes from "./routes/attendance.routes";
 // import timetableRoutes  from "./routes/timetable.routes";
 // import lessonRoutes     from "./routes/lesson.routes";
@@ -30,7 +30,7 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // API Routes 
-// app.use("/api/auth",        authRoutes);
+app.use("/api/auth",        authRoutes);
 // app.use("/api/attendance",  attendanceRoutes);
 // app.use("/api/timetable",   timetableRoutes);
 // app.use("/api/lessons",     lessonRoutes);

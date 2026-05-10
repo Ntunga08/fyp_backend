@@ -1,7 +1,15 @@
 
+
 import app from "./app";
 import prisma from "./src/config/prisma";
 import env from "./src/config/env";
+
+import dotenv from "dotenv";
+dotenv.config();
+
+
+console.log("DATABASE_URL raw:", process.env.DATABASE_URL);
+console.log("type:", typeof process.env.DATABASE_URL);
 
 async function main() {
   try {

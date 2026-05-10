@@ -6,6 +6,9 @@ import morgan from "morgan";
 
 // Routes (uncomment as you build each one)
 import authRoutes from "./src/routes/auth.route.js";
+import timetableRoutes from "./src/routes/timetable.route.js";
+
+console.log(" authRoutes imported:", typeof authRoutes);
 // import attendanceRoutes from "./routes/attendance.routes";
 // import timetableRoutes  from "./routes/timetable.routes";
 // import lessonRoutes     from "./routes/lesson.routes";
@@ -30,9 +33,12 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // API Routes 
+console.log(" Registering routes...");
 app.use("/api/auth",        authRoutes);
+console.log(" Auth routes registered");
 // app.use("/api/attendance",  attendanceRoutes);
-// app.use("/api/timetable",   timetableRoutes);
+app.use("/api/timetable",   timetableRoutes);
+console.log(" Timetable routes registered");
 // app.use("/api/lessons",     lessonRoutes);
 // app.use("/api/substitutes", substituteRoutes);
 // app.use("/api/reports",     reportRoutes);

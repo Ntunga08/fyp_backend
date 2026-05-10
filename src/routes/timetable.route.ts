@@ -7,7 +7,7 @@ const router: Router = Router()
 // All timetable routes require authentication
 router.use(requireAuth)
 
-// ─── Teacher routes ───────────────────────────────────────────────────────────
+//Teacher routes
 
 // Teacher views their own full timetable
 router.get('/my', requireRole('TEACHER'), TimetableController.getMyTimetable)
@@ -15,7 +15,7 @@ router.get('/my', requireRole('TEACHER'), TimetableController.getMyTimetable)
 // Teacher views their schedule for a specific day (used at check-in time)
 router.get('/day/:day', requireRole('TEACHER'), TimetableController.getByDay)
 
-// ─── Admin / Principal routes ─────────────────────────────────────────────────
+// Admin / Principal routes 
 
 // View all slots — filterable by ?teacherId=&day=&class=
 router.get('/', requireRole('ADMIN', 'PRINCIPAL'), TimetableController.getAll)

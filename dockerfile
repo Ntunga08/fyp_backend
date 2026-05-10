@@ -27,4 +27,4 @@ COPY . .
 EXPOSE 3000
 
 # Start the server using tsx (runs TypeScript directly — no compile step needed)
-CMD ["pnpm", "exec", "tsx", "src/server.ts"]
+CMD ["pnpm", "exec", "tsx", "server.ts"]

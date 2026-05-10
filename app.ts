@@ -6,7 +6,10 @@ import morgan from "morgan";
 
 // Routes (uncomment as you build each one)
 import authRoutes from "./src/routes/auth.route.js";
+import attendanceRoutes from "./src/routes/attendance.route.js";
 import timetableRoutes from "./src/routes/timetable.route.js";
+import lessonRoutes from "./src/routes/lesson.route.js";
+import substituteRoutes from "./src/routes/substitute.route.js";
 
 console.log(" authRoutes imported:", typeof authRoutes);
 // import attendanceRoutes from "./routes/attendance.routes";
@@ -36,11 +39,13 @@ app.get("/", (_req: Request, res: Response) => {
 console.log(" Registering routes...");
 app.use("/api/auth",        authRoutes);
 console.log(" Auth routes registered");
-// app.use("/api/attendance",  attendanceRoutes);
+app.use("/api/attendance",  attendanceRoutes);
+console.log(" Attendance routes registered");
 app.use("/api/timetable",   timetableRoutes);
 console.log(" Timetable routes registered");
-// app.use("/api/lessons",     lessonRoutes);
-// app.use("/api/substitutes", substituteRoutes);
+app.use("/api/lessons",     lessonRoutes);
+app.use("/api/substitutes", substituteRoutes);
+console.log(" Substitute routes registered");
 // app.use("/api/reports",     reportRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { Day } from '@prisma/client'
 import * as TimetableService from '../services/timetable.service'
 import type { CreateTimetableDTO, UpdateTimetableDTO } from '../types/timetable.types'
 
-// ─── POST /api/timetable ──────────────────────────────────────────────────────
+// POST /api/timetable 
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -24,7 +24,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/timetable ───────────────────────────────────────────────────────
+//GET /api/timetable
 // Admin/Principal: all slots, optionally filtered by ?teacherId, ?day, ?class
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -59,8 +59,7 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/timetable/my ────────────────────────────────────────────────────
-// Teacher: their own timetable
+// GET /api/timetable/my 
 
 export const getMyTimetable = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -77,7 +76,7 @@ export const getMyTimetable = async (req: Request, res: Response): Promise<void>
   }
 }
 
-// ─── GET /api/timetable/day/:day ──────────────────────────────────────────────
+//  GET /api/timetable/day/:day
 // Teacher: their schedule for a specific day (used during check-in)
 
 export const getByDay = async (req: Request, res: Response): Promise<void> => {
@@ -110,7 +109,7 @@ export const getByDay = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/timetable/:id ───────────────────────────────────────────────────
+// GET /api/timetable/:id 
 
 export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -124,8 +123,7 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── PUT /api/timetable/:id ───────────────────────────────────────────────────
-
+// PUT /api/timetable/:id 
 export const update = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Number(req.params.id)
@@ -147,8 +145,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── DELETE /api/timetable/:id ────────────────────────────────────────────────
-
+// DELETE /api/timetable/:id 
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Number(req.params.id)

@@ -3,14 +3,14 @@ import { hashPassword, comparePassword } from '../utils/password.js'
 import { signToken } from '../utils/jwt.js'
 import type { RegisterDTO, LoginDTO, AuthResponse, SafeUser } from '../types/auth.types.js'
 
-// ─── Strip password from user object ─────────────────────────────────────────
+//Strip password from user object
 
 const sanitizeUser = (user: any): SafeUser => {
   const { password, updatedAt, ...safe } = user
   return safe
 }
 
-// ─── Register ─────────────────────────────────────────────────────────────────
+// Register
 
 export const register = async (dto: RegisterDTO): Promise<AuthResponse> => {
   const existing = await prisma.user.findUnique({
@@ -38,8 +38,7 @@ export const register = async (dto: RegisterDTO): Promise<AuthResponse> => {
   return { token, user: sanitizeUser(user) }
 }
 
-// ─── Login ────────────────────────────────────────────────────────────────────
-
+// Login
 export const login = async (dto: LoginDTO): Promise<AuthResponse> => {
   const user = await prisma.user.findUnique({
     where: { email: dto.email },
@@ -64,7 +63,7 @@ export const login = async (dto: LoginDTO): Promise<AuthResponse> => {
   return { token, user: sanitizeUser(user) }
 }
 
-// ─── Get current user by ID ───────────────────────────────────────────────────
+//  Get current user by ID 
 
 export const getMe = async (userId: number): Promise<SafeUser> => {
   const user = await prisma.user.findUnique({

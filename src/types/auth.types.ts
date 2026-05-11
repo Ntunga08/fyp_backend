@@ -7,6 +7,7 @@ export interface RegisterDTO {
   email: string
   password: string
   role: Role
+  schoolId: number
   phone?: string
 }
 

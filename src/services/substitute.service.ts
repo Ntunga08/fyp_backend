@@ -1,10 +1,11 @@
-import prisma from '../config/prisma'
+import prisma from '../config/prisma.js'
+import { notify } from '../utils/notify.js'
 import type {
   AssignSubstituteDTO,
   RecordSubstituteLessonDTO,
   SubstituteFilters,
   SubstituteResponse,
-} from '../types/substitute.types'
+} from '../types/substitute.types.js'
 
 // ─── Shared include ───────────────────────────────────────────────────────────
 
@@ -119,6 +120,14 @@ export const assign = async (
       data:  { status: 'SUBSTITUTED' },
     }),
   ])
+
+  await notify.substituteAssigned(
+    dto.substituteTeacherId,
+    lesson.timetable.subject,
+    lesson.timetable.class,
+    lesson.timetable.day,
+    lesson.timetable.timeSlot
+  )
 
   return substitute as unknown as SubstituteResponse
 }

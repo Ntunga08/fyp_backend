@@ -5,6 +5,7 @@ import {
   getTodayAsDay,
   SCHOOL_RADIUS_METRES,
 } from '../utils/geolocation'
+import { isHoliday } from './holiday.service'
 import type {
   CheckInDTO,
   AttendanceFilters,
@@ -35,6 +36,19 @@ export const checkIn = async (
   teacherId: number,
   dto: CheckInDTO
 ): Promise<AttendanceResponse> => {
+  const teacher = await prisma.user.findUnique({
+    where: { id: teacherId },
+    select: { id: true, schoolId: true, isActive: true },
+  })
+
+  if (!teacher) {
+    throw new Error('Teacher not found')
+  }
+
+  if (!teacher.isActive) {
+    throw new Error('Account is deactivated. Contact your administrator')
+  }
+
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -42,6 +56,15 @@ export const checkIn = async (
   const day = getTodayAsDay()
   if (!day) {
     throw new Error('Check-in is only available on weekdays (Mon – Fri)')
+  }
+
+  const holiday = await isHoliday(teacher.schoolId, today)
+  if (holiday.isHoliday) {
+    throw new Error(
+      holiday.name
+        ? `Check-in blocked. Today is a school holiday: ${holiday.name}`
+        : 'Check-in blocked. Today is a school holiday'
+    )
   }
 
   // Block duplicate check-in

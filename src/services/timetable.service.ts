@@ -49,6 +49,7 @@ export const create = async (dto: CreateTimetableDTO): Promise<TimetableResponse
   const slot = await prisma.timetable.create({
     data: {
       teacherId: dto.teacherId,
+      schoolId: dto.schoolId,
       subject: dto.subject,
       class: dto.class,
       day: dto.day,

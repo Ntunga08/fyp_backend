@@ -7,9 +7,14 @@ import morgan from "morgan";
 // Routes (uncomment as you build each one)
 import authRoutes from "./src/routes/auth.route.js";
 import attendanceRoutes from "./src/routes/attendance.route.js";
+import schoolRoutes from "./src/routes/school.route.js";
+import holidayRoutes from "./src/routes/holiday.route.js";
+import leaveRoutes from "./src/routes/leave.route.js";
+import notificationRoutes from "./src/routes/notification.route.js";
 import timetableRoutes from "./src/routes/timetable.route.js";
 import lessonRoutes from "./src/routes/lesson.route.js";
 import substituteRoutes from "./src/routes/substitute.route.js";
+import reportRoutes from "./src/routes/report.route.js";
 
 console.log(" authRoutes imported:", typeof authRoutes);
 // import attendanceRoutes from "./routes/attendance.routes";
@@ -41,12 +46,21 @@ app.use("/api/auth",        authRoutes);
 console.log(" Auth routes registered");
 app.use("/api/attendance",  attendanceRoutes);
 console.log(" Attendance routes registered");
+app.use("/api/schools",     schoolRoutes);
+console.log(" School routes registered");
+app.use("/api/holidays",    holidayRoutes);
+console.log(" Holiday routes registered");
+app.use("/api/leave",       leaveRoutes);
+console.log(" Leave routes registered");
+app.use("/api/notifications", notificationRoutes);
+console.log(" Notification routes registered");
 app.use("/api/timetable",   timetableRoutes);
 console.log(" Timetable routes registered");
 app.use("/api/lessons",     lessonRoutes);
 app.use("/api/substitutes", substituteRoutes);
 console.log(" Substitute routes registered");
-// app.use("/api/reports",     reportRoutes);
+app.use("/api/reports",     reportRoutes);
+console.log(" Report routes registered");
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {

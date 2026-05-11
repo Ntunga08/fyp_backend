@@ -1,143 +1,288 @@
-generator client {
-  provider = "prisma-client-js"
-}
+	generator client {
+	  provider = "prisma-client-js"
+	}
 
-datasource db {
-  provider = "postgresql"
-}
+	datasource db {
+	  provider = "postgresql"
+	}
 
-enum Role {
-  TEACHER
-  PRINCIPAL
-  ADMIN
-}
+	// ─── Enums ────────────────────────────────────────────────────────────────────
 
-enum Day {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-}
+	enum Role {
+	  TEACHER
+	  PRINCIPAL
+	  ADMIN
+	}
 
-enum LessonStatus {
-  CONDUCTED
-  MISSED
-  SUBSTITUTED
-}
+	enum Day {
+	  MONDAY
+	  TUESDAY
+	  WEDNESDAY
+	  THURSDAY
+	  FRIDAY
+	}
 
-enum AttendanceStatus {
-  PRESENT
-  ABSENT
-  LATE
-}
+	enum LessonStatus {
+	  CONDUCTED
+	  MISSED
+	  SUBSTITUTED
+	}
 
-enum FaceVerificationStatus {
-  PENDING
-  VERIFIED
-  FAILED
-}
+	enum AttendanceStatus {
+	  PRESENT
+	  ABSENT
+	  LATE
+	}
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  phone     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+	enum FaceVerificationStatus {
+	  PENDING
+	  VERIFIED
+	  FAILED
+	}
 
-  timetables Timetable[]
-  attendances Attendance[]
-  lessons Lesson[]
-  substitutesAsOriginal Substitute[] @relation("OriginalTeacher")
-  substitutesAsCover Substitute[] @relation("SubstituteTeacher")
-  faceVerifications FaceVerification[]
+	enum LeaveStatus {
+	  PENDING
+	  APPROVED
+	  REJECTED
+	}
 
-  @@map("users")
-}
+	enum NotificationType {
+	  MISSED_LESSON
+	  SUBSTITUTE_ASSIGNED
+	  LEAVE_APPROVED
+	  LEAVE_REJECTED
+	  FACE_VERIFICATION
+	  INCONSISTENCY_DETECTED
+	  CHECK_IN_REMINDER
+	}
 
-model Timetable {
-  id        Int      @id @default(autoincrement())
-  teacherId Int
-  subject   String
-  class     String
-  day       Day
-  timeSlot  String
-  room      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+	// ─── School ───────────────────────────────────────────────────────────────────
 
-  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  lessons Lesson[]
+	model School {
+	  id               Int      @id @default(autoincrement())
+	  name             String
+	  address          String?
+	  latitude         Float
+	  longitude        Float
+	  radiusMetres     Int      @default(100)
+	  lateCutoffHour   Int      @default(8)
+	  lateCutoffMinute Int      @default(15)
+	  isActive         Boolean  @default(true)
+	  createdAt        DateTime @default(now())
+	  updatedAt        DateTime @updatedAt
 
-  @@map("timetable")
-}
+	  users        User[]
+	  timetables   Timetable[]
+	  holidays     SchoolHoliday[]
 
-model Attendance {
-  id        Int              @id @default(autoincrement())
-  teacherId Int
-  date      DateTime         @db.Date
-  timeIn    DateTime
-  latitude  Float
-  longitude Float
-  status    AttendanceStatus @default(PRESENT)
-  createdAt DateTime @default(now())
+	  @@map("schools")
+	}
 
-  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+	// ─── User ─────────────────────────────────────────────────────────────────────
 
-  @@unique([teacherId, date])
-  @@map("attendance")
-}
+	model User {
+	  id        Int      @id @default(autoincrement())
+	  schoolId  Int
+	  name      String
+	  email     String   @unique
+	  password  String
+	  role      Role
+	  phone     String?
+	  isActive  Boolean  @default(true)
+	  createdAt DateTime @default(now())
+	  updatedAt DateTime @updatedAt
 
-model Lesson {
-  id          Int          @id @default(autoincrement())
-  teacherId   Int
-  timetableId Int
-  date        DateTime     @db.Date
-  status      LessonStatus @default(CONDUCTED)
-  notes String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+	  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  timetable Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+	  timetables            Timetable[]
+	  attendances           Attendance[]
+	  lessons               Lesson[]
+	  substitutesAsOriginal Substitute[]      @relation("OriginalTeacher")
+	  substitutesAsCover    Substitute[]      @relation("SubstituteTeacher")
+	  faceVerifications     FaceVerification[]
+	  faceProfile           FaceProfile?
+	  leaveRequests         LeaveRequest[]    @relation("TeacherLeaves")
+	  leaveReviews          LeaveRequest[]    @relation("LeaveReviewer")
+	  notifications         Notification[]
+	  auditLogs             AuditLog[]
 
-  substitute Substitute?
-  faceVerification FaceVerification?
+	  @@map("users")
+	}
 
-  @@unique([timetableId, date])
-  @@map("lessons")
-}
+	// ─── Timetable ────────────────────────────────────────────────────────────────
 
-model Substitute {
-  id                  Int      @id @default(autoincrement())
-  originalTeacherId   Int
-  substituteTeacherId Int
-  lessonId            Int      @unique
-  date                DateTime @db.Date
-  reason              String?
-  createdAt           DateTime @default(now())
+	model Timetable {
+	  id        Int      @id @default(autoincrement())
+	  schoolId  Int
+	  teacherId Int
+	  subject   String
+	  class     String
+	  day       Day
+	  timeSlot  String
+	  room      String?
+	  createdAt DateTime @default(now())
+	  updatedAt DateTime @updatedAt
 
-  originalTeacher   User   @relation("OriginalTeacher", fields: [originalTeacherId], references: [id])
-  substituteTeacher User   @relation("SubstituteTeacher", fields: [substituteTeacherId], references: [id])
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+	  school  School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+	  teacher User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+	  lessons Lesson[]
 
-  @@map("substitutes")
-}
+	  @@map("timetable")
+	}
 
-model FaceVerification {
-  id         Int                    @id @default(autoincrement())
-  teacherId  Int
-  lessonId   Int                    @unique
-  status     FaceVerificationStatus @default(PENDING)
-  verifiedAt DateTime?
-  createdAt  DateTime               @default(now())
+	// ─── Attendance ───────────────────────────────────────────────────────────────
 
-  teacher User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+	model Attendance {
+	  id        Int              @id @default(autoincrement())
+	  teacherId Int
+	  date      DateTime         @db.Date
+	  timeIn    DateTime
+	  latitude  Float
+	  longitude Float
+	  status    AttendanceStatus @default(PRESENT)
+	  createdAt DateTime         @default(now())
 
-  @@map("face_verifications")
-}
+	  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+	  @@unique([teacherId, date])
+	  @@map("attendance")
+	}
+
+	// ─── Lesson ───────────────────────────────────────────────────────────────────
+
+	model Lesson {
+	  id          Int          @id @default(autoincrement())
+	  teacherId   Int
+	  timetableId Int
+	  date        DateTime     @db.Date
+	  status      LessonStatus @default(CONDUCTED)
+	  notes       String?
+	  createdAt   DateTime     @default(now())
+	  updatedAt   DateTime     @updatedAt
+
+	  teacher          User              @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+	  timetable        Timetable         @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+	  substitute       Substitute?
+	  faceVerification FaceVerification?
+
+	  @@unique([timetableId, date])
+	  @@map("lessons")
+	}
+
+	// ─── Substitute ───────────────────────────────────────────────────────────────
+
+	model Substitute {
+	  id                  Int      @id @default(autoincrement())
+	  originalTeacherId   Int
+	  substituteTeacherId Int
+	  lessonId            Int      @unique
+	  date                DateTime @db.Date
+	  reason              String?
+	  createdAt           DateTime @default(now())
+
+	  originalTeacher   User   @relation("OriginalTeacher",   fields: [originalTeacherId],   references: [id])
+	  substituteTeacher User   @relation("SubstituteTeacher", fields: [substituteTeacherId], references: [id])
+	  lesson            Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+	  @@map("substitutes")
+	}
+
+	// ─── FaceVerification ─────────────────────────────────────────────────────────
+
+	model FaceVerification {
+	  id         Int                    @id @default(autoincrement())
+	  teacherId  Int
+	  lessonId   Int                    @unique
+	  status     FaceVerificationStatus @default(PENDING)
+	  verifiedAt DateTime?
+	  createdAt  DateTime               @default(now())
+
+	  teacher User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+	  lesson  Lesson @relation(fields: [lessonId],  references: [id], onDelete: Cascade)
+
+	  @@map("face_verifications")
+	}
+
+	// ─── FaceProfile ──────────────────────────────────────────────────────────────
+
+	model FaceProfile {
+	  id             Int      @id @default(autoincrement())
+	  teacherId      Int      @unique
+	  referencePhoto String   // base64 string or S3/cloud URL
+	  descriptor     String?  // JSON face descriptor for face-api.js matching
+	  enrolledAt     DateTime @default(now())
+	  updatedAt      DateTime @updatedAt
+
+	  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+	  @@map("face_profiles")
+	}
+
+	// ─── LeaveRequest ─────────────────────────────────────────────────────────────
+
+	model LeaveRequest {
+	  id          Int         @id @default(autoincrement())
+	  teacherId   Int
+	  startDate   DateTime    @db.Date
+	  endDate     DateTime    @db.Date
+	  reason      String
+	  status      LeaveStatus @default(PENDING)
+	  reviewedBy  Int?
+	  reviewedAt  DateTime?
+	  reviewNote  String?     // admin feedback on rejection
+	  createdAt   DateTime    @default(now())
+	  updatedAt   DateTime    @updatedAt
+
+	  teacher  User  @relation("TeacherLeaves", fields: [teacherId],  references: [id], onDelete: Cascade)
+	  reviewer User? @relation("LeaveReviewer", fields: [reviewedBy], references: [id])
+
+	  @@map("leave_requests")
+	}
+
+	// ─── SchoolHoliday ────────────────────────────────────────────────────────────
+
+	model SchoolHoliday {
+	  id          Int      @id @default(autoincrement())
+	  schoolId    Int
+	  name        String   // e.g. "Eid Al-Fitr", "Independence Day"
+	  date        DateTime @db.Date
+	  description String?
+	  createdAt   DateTime @default(now())
+
+	  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+	  @@unique([schoolId, date])
+	  @@map("school_holidays")
+	}
+
+	// ─── Notification ─────────────────────────────────────────────────────────────
+
+	model Notification {
+	  id        Int              @id @default(autoincrement())
+	  userId    Int
+	  type      NotificationType
+	  title     String
+	  message   String
+	  isRead    Boolean          @default(false)
+	  createdAt DateTime         @default(now())
+
+	  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	  @@map("notifications")
+	}
+
+	// ─── AuditLog ─────────────────────────────────────────────────────────────────
+
+	model AuditLog {
+	  id        Int      @id @default(autoincrement())
+	  userId    Int
+	  action    String   // e.g. "ASSIGNED_SUBSTITUTE", "APPROVED_LEAVE"
+	  entity    String   // e.g. "Lesson", "Attendance", "LeaveRequest"
+	  entityId  Int
+	  details   String?  // JSON string — what changed
+	  createdAt DateTime @default(now())
+
+	  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	  @@map("audit_logs")
+	}

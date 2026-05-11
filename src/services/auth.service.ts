@@ -13,6 +13,12 @@ const sanitizeUser = (user: any): SafeUser => {
 // Register
 
 export const register = async (dto: RegisterDTO): Promise<AuthResponse> => {
+  // schoolId is optional for ADMIN role (they can create schools)
+  // but required for TEACHER and PRINCIPAL
+  if (dto.role !== 'ADMIN' && dto.schoolId === undefined) {
+    throw new Error('schoolId is required for teachers and principals')
+  }
+
   const existing = await prisma.user.findUnique({
     where: { email: dto.email },
   })
@@ -29,6 +35,7 @@ export const register = async (dto: RegisterDTO): Promise<AuthResponse> => {
       email: dto.email,
       password: hashed,
       role: dto.role,
+      schoolId: dto.schoolId ?? null,
       phone: dto.phone ?? null,
     },
   })

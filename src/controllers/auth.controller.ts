@@ -6,6 +6,25 @@ import type { RegisterDTO, LoginDTO } from '../types/auth.types.js'
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const dto: RegisterDTO = req.body
+
+    // Validate required fields
+    if (!dto.name || !dto.email || !dto.password || !dto.role) {
+      res.status(400).json({
+        success: false,
+        message: 'name, email, password and role are required',
+      })
+      return
+    }
+
+    // schoolId is required for TEACHER and PRINCIPAL, but optional for ADMIN
+    if (dto.role !== 'ADMIN' && dto.schoolId === undefined) {
+      res.status(400).json({
+        success: false,
+        message: 'schoolId is required for teachers and principals',
+      })
+      return
+    }
+
     const result = await AuthService.register(dto)
 
     res.status(201).json({

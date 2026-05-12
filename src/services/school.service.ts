@@ -220,3 +220,20 @@ export const getStats = async (id: number) => {
     },
   }
 }
+
+
+// ─── Get public schools list (for registration) ──────────────────────────────
+
+export const getPublicSchools = async () => {
+  const schools = await db.school.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      name: true,
+      address: true,
+    },
+    orderBy: { name: 'asc' },
+  })
+
+  return schools
+}

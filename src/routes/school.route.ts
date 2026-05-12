@@ -4,10 +4,15 @@ import { requireAuth, requireRole } from '../middleware/auth.middleware.js'
 
 const router: Router = Router()
 
-// All routes require authentication
-router.use(requireAuth)
+// ─── Public routes ────────────────────────────────────────────────────────────
+
+// List all active schools (for registration page)
+router.get('/public/list', SchoolController.getPublicSchools)
 
 // ─── All roles ────────────────────────────────────────────────────────────────
+
+// All routes below require authentication
+router.use(requireAuth)
 
 // Any logged-in user views their own school
 router.get('/my', SchoolController.getMySchool)

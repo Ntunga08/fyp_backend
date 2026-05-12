@@ -15,8 +15,10 @@ import timetableRoutes from "./src/routes/timetable.route.js";
 import lessonRoutes from "./src/routes/lesson.route.js";
 import substituteRoutes from "./src/routes/substitute.route.js";
 import reportRoutes from "./src/routes/report.route.js";
+import * as SchoolController from "./src/controllers/school.controller.js";
+import publicRoutes from "./src/routes/public.route.js";
+import prisma from "./src/config/prisma.js";
 
-console.log(" authRoutes imported:", typeof authRoutes);
 // import attendanceRoutes from "./routes/attendance.routes";
 // import timetableRoutes  from "./routes/timetable.routes";
 // import lessonRoutes     from "./routes/lesson.routes";
@@ -41,28 +43,51 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // API Routes 
-console.log(" Registering routes...");
+
+// Public endpoint - Get schools list (no auth required)
+app.get("/api/public/schools", async (_req: Request, res: Response) => {
+  try {
+    const schools = await prisma.school.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        address: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    res.status(200).json({
+      success: true,
+      count: schools.length,
+      data: schools,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Public routes (no auth)
+console.log(" Public routes imported:", typeof publicRoutes);
+app.use("/api/public", publicRoutes);
+console.log(" Public routes registered");
+
 app.use("/api/auth",        authRoutes);
-console.log(" Auth routes registered");
 app.use("/api/attendance",  attendanceRoutes);
-console.log(" Attendance routes registered");
+
+// Register public school endpoint BEFORE the protected school routes
+app.get("/api/schools/public/list", SchoolController.getPublicSchools);
+
 app.use("/api/schools",     schoolRoutes);
-console.log(" School routes registered");
 app.use("/api/holidays",    holidayRoutes);
-console.log(" Holiday routes registered");
 app.use("/api/leave",       leaveRoutes);
-console.log(" Leave routes registered");
 app.use("/api/notifications", notificationRoutes);
-console.log(" Notification routes registered");
 app.use("/api/timetable",   timetableRoutes);
-console.log(" Timetable routes registered");
 app.use("/api/lessons",     lessonRoutes);
 app.use("/api/substitutes", substituteRoutes);
-console.log(" Substitute routes registered");
 app.use("/api/reports",     reportRoutes);
-console.log(" Report routes registered");
 
-// ── 404 Handler ───────────────────────────────────────────────────────────────
+//404 Handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,

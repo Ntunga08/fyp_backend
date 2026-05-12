@@ -157,3 +157,21 @@ export const reactivate = async (req: Request, res: Response): Promise<void> => 
     res.status(notFound ? 404 : 400).json({ success: false, message: error.message })
   }
 }
+
+
+// ─── GET /api/schools/public/list ─────────────────────────────────────────────
+// Public endpoint - no auth required
+
+export const getPublicSchools = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const schools = await SchoolService.getPublicSchools()
+
+    res.status(200).json({
+      success: true,
+      count: schools.length,
+      data: schools,
+    })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}

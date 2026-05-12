@@ -16,6 +16,10 @@ router.post('/login', AuthController.login)
 // Protected routes
 
 router.get('/me', requireAuth, AuthController.getMe)
+router.get('/pending', requireAuth, AuthController.getPendingUsers)
+router.get('/school-users', requireAuth, AuthController.getSchoolUsers)
+router.put('/approve/:userId', requireAuth, AuthController.approveUser)
+router.put('/reject/:userId', requireAuth, AuthController.rejectUser)
 
 
 export default router

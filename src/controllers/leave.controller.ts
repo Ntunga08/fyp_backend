@@ -100,6 +100,20 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
+// ─── GET /api/leave/pending ───────────────────────────────────────────────────
+// Admin/Principal: pending leave requests only
+
+export const getPending = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const filters: LeaveFilters = { status: 'PENDING' }
+    const leaves = await LeaveService.getAll(filters)
+
+    res.status(200).json({ success: true, count: leaves.length, data: leaves })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
 // ─── GET /api/leave/:id ───────────────────────────────────────────────────────
 
 export const getById = async (req: Request, res: Response): Promise<void> => {

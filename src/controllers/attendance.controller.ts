@@ -137,6 +137,53 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
+// GET /api/attendance/school/:schoolId/today
+// Admin/Principal: today's attendance for a specific school
+
+export const getSchoolToday = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const schoolId = Number(req.params.schoolId)
+    const today = new Date().toISOString().split('T')[0]
+    
+    const filters: AttendanceFilters = { date: today }
+    const records = await AttendanceService.getAll(filters)
+
+    res.status(200).json({
+      success: true,
+      count: records.length,
+      data: records,
+    })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+// GET /api/attendance/school/:schoolId/weekly
+// Admin/Principal: weekly attendance for a specific school
+
+export const getSchoolWeekly = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const schoolId = Number(req.params.schoolId)
+    const today = new Date()
+    const weekAgo = new Date(today)
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    
+    const filters: AttendanceFilters = {
+      startDate: weekAgo.toISOString().split('T')[0],
+      endDate: today.toISOString().split('T')[0]
+    }
+    const records = await AttendanceService.getAll(filters)
+
+    res.status(200).json({
+      success: true,
+      count: records.length,
+      data: records,
+    })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
 // GET /api/attendance/summary 
 // Admin/Principal: summary stats per teacher — ?startDate=&endDate=
 

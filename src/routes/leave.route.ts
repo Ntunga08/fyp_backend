@@ -32,11 +32,11 @@ router.delete(
 
 // ─── Admin / Principal routes ─────────────────────────────────────────────────
 
-// View all leave requests (filterable)
+// View pending leave requests only (must be before /:id)
 router.get(
-  '/',
+  '/pending',
   requireRole('ADMIN', 'PRINCIPAL'),
-  LeaveController.getAll
+  LeaveController.getPending
 )
 
 // View single leave request
@@ -44,6 +44,13 @@ router.get(
   '/:id',
   requireRole('ADMIN', 'PRINCIPAL'),
   LeaveController.getById
+)
+
+// View all leave requests (filterable)
+router.get(
+  '/',
+  requireRole('ADMIN', 'PRINCIPAL'),
+  LeaveController.getAll
 )
 
 // Approve leave → auto marks absent + generates missed lessons

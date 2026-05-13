@@ -15,6 +15,7 @@ import timetableRoutes from "./src/routes/timetable.route.js";
 import lessonRoutes from "./src/routes/lesson.route.js";
 import substituteRoutes from "./src/routes/substitute.route.js";
 import reportRoutes from "./src/routes/report.route.js";
+import settingsRoutes from "./src/routes/settings.route.js";
 import * as SchoolController from "./src/controllers/school.controller.js";
 import publicRoutes from "./src/routes/public.route.js";
 import prisma from "./src/config/prisma.js";
@@ -28,7 +29,13 @@ import prisma from "./src/config/prisma.js";
 const app: Application = express();
 
 //Global Middleware 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins for development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // logs every request in terminal
@@ -80,12 +87,13 @@ app.get("/api/schools/public/list", SchoolController.getPublicSchools);
 
 app.use("/api/schools",     schoolRoutes);
 app.use("/api/holidays",    holidayRoutes);
-app.use("/api/leave",       leaveRoutes);
+app.use("/api/leaves",      leaveRoutes);  // Changed from /api/leave to /api/leaves
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/timetable",   timetableRoutes);
 app.use("/api/lessons",     lessonRoutes);
 app.use("/api/substitutes", substituteRoutes);
 app.use("/api/reports",     reportRoutes);
+app.use("/api/settings",    settingsRoutes);
 
 //404 Handler
 app.use((_req: Request, res: Response) => {

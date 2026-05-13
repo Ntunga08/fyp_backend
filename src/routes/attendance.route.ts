@@ -22,6 +22,12 @@ router.get('/my', requireRole('TEACHER'), AttendanceController.getMyHistory)
 // View all attendance records (filterable)
 router.get('/', requireRole('ADMIN', 'PRINCIPAL'), AttendanceController.getAll)
 
+// Get today's attendance for a school
+router.get('/school/:schoolId/today', requireRole('ADMIN', 'PRINCIPAL'), AttendanceController.getSchoolToday)
+
+// Get weekly attendance for a school
+router.get('/school/:schoolId/weekly', requireRole('ADMIN', 'PRINCIPAL'), AttendanceController.getSchoolWeekly)
+
 // Summary stats per teacher
 router.get('/summary', requireRole('ADMIN', 'PRINCIPAL'), AttendanceController.getSummary)
 

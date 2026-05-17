@@ -20,8 +20,13 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set");
 }
 
+// SSL is required for remote databases (Render, Supabase, etc.)
+// Local Docker connections (localhost) don't need it
+const isRemote = !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1')
+
 const pool = new Pool({
   connectionString,
+  ssl: isRemote ? { rejectUnauthorized: false } : undefined,
 });
 
 const adapter = new PrismaPg(pool);

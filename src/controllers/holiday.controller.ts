@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import * as HolidayService from '../services/holiday.service.js'
 import type { CreateHolidayDTO, UpdateHolidayDTO, HolidayFilters } from '../types/holiday.types.js'
 
-// ─── POST /api/holidays ───────────────────────────────────────────────────────
+// POST /api/holidays
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -32,7 +32,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/holidays ────────────────────────────────────────────────────────
+// GET /api/holidays
 // Admin/Principal: all holidays, filterable
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -58,7 +58,7 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/holidays/my ─────────────────────────────────────────────────────
+//GET /api/holidays/my
 // Any user: holidays for their own school
 
 export const getMySchoolHolidays = async (req: Request, res: Response): Promise<void> => {
@@ -84,7 +84,7 @@ export const getMySchoolHolidays = async (req: Request, res: Response): Promise<
   }
 }
 
-// ─── GET /api/holidays/upcoming/:schoolId ─────────────────────────────────────
+//  GET /api/holidays/upcoming/:schoolId
 // Upcoming holidays in next 30 days — for dashboard
 
 export const getUpcoming = async (req: Request, res: Response): Promise<void> => {
@@ -104,7 +104,7 @@ export const getUpcoming = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
-// ─── GET /api/holidays/check ──────────────────────────────────────────────────
+//  GET /api/holidays/check 
 // Check if a specific date is a holiday — used by attendance check-in
 // ?schoolId=1&date=2025-12-25
 
@@ -131,7 +131,7 @@ export const checkDate = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/holidays/:id ────────────────────────────────────────────────────
+//  GET /api/holidays/:id 
 
 export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -145,7 +145,7 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── PUT /api/holidays/:id ────────────────────────────────────────────────────
+// PUT /api/holidays/:id 
 
 export const update = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -169,7 +169,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── DELETE /api/holidays/:id ─────────────────────────────────────────────────
+// DELETE /api/holidays/:id 
 
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -187,7 +187,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── POST /api/holidays/bulk/:schoolId ───────────────────────────────────────
+//  POST /api/holidays/bulk/:schoolId   
 // Auto-create Tanzania public holidays for a given year
 
 export const bulkCreate = async (req: Request, res: Response): Promise<void> => {

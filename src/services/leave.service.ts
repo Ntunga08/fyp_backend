@@ -1,6 +1,11 @@
 import { Prisma } from '@prisma/client'
 import prisma from '../config/prisma.js'
 import { notify } from '../utils/notify.js'
+import {
+  leaveSubmittedEmail,
+  leaveApprovedEmail,
+  leaveRejectedEmail,
+} from '../utils/email.js'
 import type {
   CreateLeaveDTO,
   ReviewLeaveDTO,
@@ -10,7 +15,7 @@ import type {
 
 const db = prisma as any
 
-// ─── Shared include ───────────────────────────────────────────────────────────
+//Shared include 
 
 const leaveInclude = {
   teacher: {
@@ -21,7 +26,7 @@ const leaveInclude = {
   },
 }
 
-// ─── Helper: count working days between two dates ─────────────────────────────
+// Helper: count working days between two dates 
 
 const countWorkingDays = (start: Date, end: Date): number => {
   let count = 0
@@ -36,8 +41,7 @@ const countWorkingDays = (start: Date, end: Date): number => {
   return count
 }
 
-// ─── Helper: get all working dates in a range ─────────────────────────────────
-
+//  Helper: get all working dates in a range 
 const getWorkingDates = (start: Date, end: Date): Date[] => {
   const dates: Date[] = []
   const current = new Date(start)
@@ -53,8 +57,7 @@ const getWorkingDates = (start: Date, end: Date): Date[] => {
   return dates
 }
 
-// ─── Helper: normalize to safe response ──────────────────────────────────────
-
+//  Helper: normalize to safe response
 const sanitize = (leave: any): LeaveResponse => ({
   ...leave,
   daysRequested: countWorkingDays(leave.startDate, leave.endDate),
@@ -62,7 +65,7 @@ const sanitize = (leave: any): LeaveResponse => ({
 
 const formatDate = (date: Date): string => date.toLocaleDateString('en-CA')
 
-// ─── Apply for leave (Teacher) ────────────────────────────────────────────────
+// Apply for leave (Teacher)
 
 export const apply = async (
   teacherId: number,
@@ -113,10 +116,39 @@ export const apply = async (
     include: leaveInclude,
   })
 
+  // Email all active admins/principals in the same school
+  const teacher = await prisma.user.findUnique({
+    where:  { id: teacherId },
+    select: { name: true, schoolId: true },
+  })
+  if (teacher?.schoolId) {
+    const admins = await prisma.user.findMany({
+      where: {
+        schoolId: teacher.schoolId,
+        role:     { in: ['ADMIN', 'PRINCIPAL'] },
+        status:   'ACTIVE',
+        isActive: true,
+      },
+      select: { name: true, email: true },
+    })
+    const days = countWorkingDays(start, end)
+    for (const admin of admins) {
+      void leaveSubmittedEmail({
+        adminEmail:  admin.email,
+        adminName:   admin.name,
+        teacherName: teacher.name,
+        startDate:   formatDate(start),
+        endDate:     formatDate(end),
+        days,
+        reason:      dto.reason,
+      })
+    }
+  }
+
   return sanitize(leave)
 }
 
-// ─── Get own leave requests (Teacher) ────────────────────────────────────────
+//Get own leave requests (Teacher)
 
 export const getMyLeaves = async (
   teacherId: number,
@@ -133,7 +165,7 @@ export const getMyLeaves = async (
   return leaves.map(sanitize)
 }
 
-// ─── Get all leave requests (Admin/Principal) ─────────────────────────────────
+//  Get all leave requests (Admin/Principal) 
 
 export const getAll = async (filters: LeaveFilters): Promise<LeaveResponse[]> => {
   const where = buildWhereClause(filters)
@@ -147,7 +179,7 @@ export const getAll = async (filters: LeaveFilters): Promise<LeaveResponse[]> =>
   return leaves.map(sanitize)
 }
 
-// ─── Get single leave request ─────────────────────────────────────────────────
+// Get single leave request
 
 export const getById = async (id: number): Promise<LeaveResponse> => {
   const leave = await db.leaveRequest.findUnique({
@@ -160,7 +192,7 @@ export const getById = async (id: number): Promise<LeaveResponse> => {
   return sanitize(leave)
 }
 
-// ─── Approve leave (Admin/Principal) ─────────────────────────────────────────
+//  Approve leave (Admin/Principal) 
 // Automatically:
 // 1. Marks attendance ABSENT for each working day
 // 2. Generates MISSED lessons for those days
@@ -184,7 +216,7 @@ export const approve = async (
 
   const workingDates = getWorkingDates(leave.startDate, leave.endDate)
 
-  // ── Run everything in a transaction ──────────────────────────────────────
+  //Run everything in a transaction 
   await db.$transaction(async (tx: any) => {
 
     // 1. Approve the leave
@@ -279,10 +311,19 @@ export const approve = async (
     formatDate(leave.endDate)
   )
 
+  void leaveApprovedEmail({
+    teacherEmail: leave.teacher.email,
+    teacherName:  leave.teacher.name,
+    startDate:    formatDate(leave.startDate),
+    endDate:      formatDate(leave.endDate),
+    days:         countWorkingDays(leave.startDate, leave.endDate),
+    note:         dto.reviewNote ?? undefined,
+  })
+
   return sanitize(updated)
 }
 
-// ─── Reject leave (Admin/Principal) ──────────────────────────────────────────
+//  Reject leave (Admin/Principal)
 
 export const reject = async (
   id:         number,
@@ -290,7 +331,10 @@ export const reject = async (
   dto:        ReviewLeaveDTO
 ): Promise<LeaveResponse> => {
 
-  const leave = await db.leaveRequest.findUnique({ where: { id } })
+  const leave = await db.leaveRequest.findUnique({
+    where:   { id },
+    include: { teacher: { select: { name: true, email: true } } },
+  })
 
   if (!leave) throw new Error('Leave request not found')
 
@@ -316,10 +360,18 @@ export const reject = async (
     dto.reviewNote ?? undefined
   )
 
+  void leaveRejectedEmail({
+    teacherEmail: leave.teacher.email,
+    teacherName:  leave.teacher.name,
+    startDate:    formatDate(leave.startDate),
+    endDate:      formatDate(leave.endDate),
+    note:         dto.reviewNote ?? undefined,
+  })
+
   return sanitize(updated)
 }
 
-// ─── Cancel leave (Teacher cancels their own PENDING request) ─────────────────
+//  Cancel leave (Teacher cancels their own PENDING request)
 
 export const cancel = async (
   id:        number,
@@ -341,8 +393,7 @@ export const cancel = async (
   await db.leaveRequest.delete({ where: { id } })
 }
 
-// ─── Helper: build Prisma where clause ───────────────────────────────────────
-
+//Helper: build Prisma where clause
 const buildWhereClause = (filters: LeaveFilters) => {
   const where: any = {}
 

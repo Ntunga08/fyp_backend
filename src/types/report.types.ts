@@ -1,4 +1,4 @@
-// ─── Query Params ─────────────────────────────────────────────────────────────
+//  Query Params
 
 export interface ReportDateRange {
   startDate: string
@@ -9,13 +9,14 @@ export interface TeacherReportParams extends ReportDateRange {
   teacherId?: number
 }
 
-// ─── Daily Report ─────────────────────────────────────────────────────────────
+// Daily Report 
 
 export interface DailyReportEntry {
   teacher: {
     id:    number
     name:  string
-    email: string
+    emai
+l: string
   }
   attendance: {
     status:   string

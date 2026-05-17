@@ -42,12 +42,12 @@ export const sendNotification = async (
   }
 }
 
-// ─── Pre-built notification templates ────────────────────────────────────────
+//  Pre-built notification templates 
 // Call these from their respective services
 
 export const notify = {
 
-  // ── Leave notifications ─────────────────────────────────────────────────
+  // Leave notifications 
 
   leaveApproved: (teacherId: number, startDate: string, endDate: string) =>
     sendNotification(
@@ -65,7 +65,7 @@ export const notify = {
       `Your leave request from ${startDate} to ${endDate} was rejected.${note ? ` Reason: ${note}` : ''}`
     ),
 
-  // ── Substitute notifications ────────────────────────────────────────────
+  // Substitute notifications 
 
   substituteAssigned: (
     substituteTeacherId: number,
@@ -81,7 +81,7 @@ export const notify = {
       `You have been assigned to cover ${subject} (${className}) on ${day} at ${timeSlot}.`
     ),
 
-  // ── Lesson notifications ────────────────────────────────────────────────
+  // Lesson notifications 
 
   missedLesson: (adminId: number, teacherName: string, subject: string, className: string) =>
     sendNotification(
@@ -91,7 +91,7 @@ export const notify = {
       `${teacherName} did not record a lesson for ${subject} (${className}) today.`
     ),
 
-  // ── Face verification notifications ────────────────────────────────────
+  //  Face verification notifications 
 
   faceVerificationTriggered: (teacherId: number, subject: string, className: string) =>
     sendNotification(
@@ -101,7 +101,7 @@ export const notify = {
       `Face verification has been triggered for your ${subject} (${className}) lesson. Please submit your photo.`
     ),
 
-  // ── Inconsistency notifications ─────────────────────────────────────────
+  //  Inconsistency notifications 
 
   inconsistencyDetected: (
     adminId:     number,
@@ -115,7 +115,7 @@ export const notify = {
       `${teacherName}: ${issue}`
     ),
 
-  // ── Check-in reminder ───────────────────────────────────────────────────
+  // Check-in reminder
 
   checkInReminder: (teacherId: number) =>
     sendNotification(

@@ -7,12 +7,12 @@ async function checkData() {
     });
     
     if (!school) {
-      console.log('❌ Mlimani School not found');
+      console.log(' Mlimani School not found');
       await prisma.$disconnect();
       return;
     }
     
-    console.log('🏫 School:', school.name, '(ID:', school.id + ')');
+    console.log(' School:', school.name, '(ID:', school.id + ')');
     console.log('');
     
     const users = await prisma.user.count({ where: { schoolId: school.id } });
@@ -54,7 +54,7 @@ async function checkData() {
     });
     
     console.log('📊 DATA SUMMARY FOR MLIMANI SCHOOL:');
-    console.log('═══════════════════════════════════');
+    console.log('');
     console.log('👥 Users:');
     console.log('   Total Users:', users);
     console.log('   Teachers:', teachers);

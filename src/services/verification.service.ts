@@ -1,12 +1,12 @@
 import { prisma } from '../config/prisma'
-import { verifyFace } from '../utils/face-recognition'
+import { verifyFace } from '../utils/face.recognition.js'
 import {
   TriggerVerificationDTO,
   SubmitVerificationDTO,
   FaceVerificationFilters,
   FaceVerificationResponse,
   FaceVerificationSummary,
-} from '../types/face-verification.types'
+} from '../types/verification.types.js'
 
 // ─── Shared include ───────────────────────────────────────────────────────────
 

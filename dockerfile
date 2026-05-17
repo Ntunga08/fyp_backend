@@ -1,26 +1,27 @@
 FROM node:20-alpine
 
-RUN npm install -g pnpm
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
+# Install dependencies first (better layer caching)
 COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-RUN pnpm install
-
-# Copy prisma config and schema
+# Copy Prisma config + schema, then generate client at build time
 COPY prisma.config.ts ./
 COPY prisma ./prisma
 
-# Set a dummy DATABASE_URL for build time (will be overridden at runtime)
-ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/edutrack"
+# Dummy URL so `prisma generate` succeeds without a real DB at build time
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 
-# Generate Prisma client
-RUN npx prisma generate
+RUN pnpm exec prisma generate
 
-# Copy everything else
+# Copy the rest of the source
 COPY . .
 
 EXPOSE 3000
 
-CMD ["pnpm", "exec", "tsx", "server.ts"]
+# At container start: apply any pending migrations, then launch the server
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm exec tsx server.ts"]

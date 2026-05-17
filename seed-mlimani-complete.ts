@@ -6,21 +6,73 @@ async function seed() {
   console.log('🌱 Seeding Mlimani School with complete data...\n')
 
   try {
+    // 0. Wipe existing data so seed is idempotent
+    console.log('🧹 Clearing existing data...')
+    await prisma.locationVerification.deleteMany()
+    await prisma.faceVerification.deleteMany()
+    await prisma.faceProfile.deleteMany()
+    await prisma.notification.deleteMany()
+    await prisma.auditLog.deleteMany()
+    await prisma.substitute.deleteMany()
+    await prisma.lesson.deleteMany()
+    await prisma.attendance.deleteMany()
+    await prisma.leaveRequest.deleteMany()
+    await prisma.schoolHoliday.deleteMany()
+    await prisma.timetable.deleteMany()
+    await prisma.allowedLocation.deleteMany()
+    await prisma.user.deleteMany()
+    await prisma.school.deleteMany()
+    console.log('  ✅ Done\n')
+
     // 1. Create Mlimani School
     console.log('📍 Creating Mlimani Secondary School...')
     const school = await prisma.school.create({
       data: {
         name: 'Mlimani Secondary School',
         address: 'Mlimani City, Dar es Salaam',
-        latitude: -6.7924,
-        longitude: 39.2083,
+        latitude: -6.769869,
+        longitude: 39.246234,
         radiusMetres: 150,
         lateCutoffHour: 8,
         lateCutoffMinute: 0,
         isActive: true,
       },
     })
-    console.log(`  ✅ Created: ${school.name} (ID: ${school.id})\n`)
+    console.log(`  ✅ Created: ${school.name} (ID: ${school.id})`)
+    console.log(`  📍 GPS: ${school.latitude}, ${school.longitude}`)
+    console.log(`  📏 Radius: ${school.radiusMetres}m\n`)
+
+    // 1b. Create AllowedLocations for GPS check-in validation
+    console.log('📍 Creating allowed check-in locations...')
+    await prisma.allowedLocation.createMany({
+      data: [
+        {
+          schoolId:     school.id,
+          name:         'Main Campus',
+          latitude:     -6.769869,
+          longitude:    39.246234,
+          radiusMetres: 150,
+          isActive:     true,
+        },
+        {
+          schoolId:     school.id,
+          name:         'Science Block',
+          latitude:     -6.769969,
+          longitude:    39.246334,
+          radiusMetres: 100,
+          isActive:     true,
+        },
+        {
+          schoolId:     school.id,
+          name:         'Sports Field',
+          latitude:     -6.769769,
+          longitude:    39.246134,
+          radiusMetres: 200,
+          isActive:     true,
+        },
+      ],
+    })
+    console.log('  ✅ Main Campus (150m radius)\n  ✅ Science Block (100m radius)\n  ✅ Sports Field (200m radius)\n')
 
     // 2. Create Super Admin
     console.log('📍 Creating Super Admin...')
@@ -285,6 +337,7 @@ async function seed() {
     console.log('✅ Seeding completed successfully!\n')
     console.log('📊 Summary:')
     console.log(`  • School: ${school.name}`)
+    console.log(`  • School GPS: ${school.latitude}, ${school.longitude} (${school.radiusMetres}m radius)`)
     console.log(`  • Admin: 1`)
     console.log(`  • Principal: 1`)
     console.log(`  • Teachers: ${teachers.length} (All ACTIVE)`)

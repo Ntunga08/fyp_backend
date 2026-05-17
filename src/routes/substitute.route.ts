@@ -1,62 +1,36 @@
 import { Router } from 'express'
-import * as SubstituteController from '../controllers/substitute.controller'
-import { requireAuth, requireRole } from '../middleware/auth.middleware'
+import * as SubstituteController from '../controllers/substitute.controller.js'
+import { requireAuth, requireRole } from '../middleware/auth.middleware.js'
 
 const router: Router = Router()
 
-// All routes require authentication
 router.use(requireAuth)
 
-// Teacher routes
-// Substitute teacher: view lessons they are assigned to cover
-router.get(
-  '/my-assignments',
-  requireRole('TEACHER'),
-  SubstituteController.getMyAssignments
-)
+// ─── Named routes (before /:id) ───────────────────────────────────────────────
 
-// Original teacher: view who covered their lessons
-router.get(
-  '/my-lessons',
-  requireRole('TEACHER'),
-  SubstituteController.getMyLessonSubstitutes
-)
+// Teacher: lessons they are covering for another teacher
+router.get('/my-assignments', requireRole('TEACHER'), SubstituteController.getMyAssignments)
 
-// Substitute teacher records notes for the covered lesson
-router.put(
-  '/:id/record',
-  requireRole('TEACHER'),
-  SubstituteController.recordSubstituteLesson
-)
+// Teacher: who covered their own lessons while they were absent
+router.get('/my-lessons', requireRole('TEACHER'), SubstituteController.getMyLessonSubstitutes)
 
-//  Admin / Principal routes 
-// View all substitute records (filterable)
-router.get(
-  '/',
-  requireRole('ADMIN', 'PRINCIPAL'),
-  SubstituteController.getAll
-)
+// ─── Admin / Principal ────────────────────────────────────────────────────────
 
-// View single substitute record
-router.get(
-  '/:id',
-  requireRole('ADMIN', 'PRINCIPAL'),
-  SubstituteController.getById
-)
+// All substitute records in school — ?originalTeacherId=&substituteTeacherId=&date=&startDate=&endDate=
+router.get('/', requireRole('ADMIN', 'PRINCIPAL'), SubstituteController.getAll)
 
-//  Admin only routes 
-// Assign substitute teacher to a MISSED lesson
-router.post(
-  '/',
-  requireRole('ADMIN'),
-  SubstituteController.assign
-)
+// Assign a substitute to a MISSED lesson
+router.post('/', requireRole('ADMIN'), SubstituteController.assign)
+
+// ─── Parameterised routes ─────────────────────────────────────────────────────
+
+// Single record
+router.get('/:id', requireRole('ADMIN', 'PRINCIPAL'), SubstituteController.getById)
+
+// Substitute teacher records notes for their covered lesson
+router.put('/:id/record', requireRole('TEACHER'), SubstituteController.recordSubstituteLesson)
 
 // Unassign substitute — reverts lesson to MISSED
-router.delete(
-  '/:id',
-  requireRole('ADMIN'),
-  SubstituteController.unassign
-)
+router.delete('/:id', requireRole('ADMIN', 'PRINCIPAL'), SubstituteController.unassign)
 
 export default router

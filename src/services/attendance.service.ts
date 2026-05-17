@@ -1,9 +1,8 @@
 import prisma from '../config/prisma'
 import {
-  isWithinSchoolRadius,
+  haversineDistance,
   resolveAttendanceStatus,
   getTodayAsDay,
-  SCHOOL_RADIUS_METRES,
 } from '../utils/geolocation'
 import { isHoliday } from './holiday.service'
 import type {
@@ -82,21 +81,56 @@ export const checkIn = async (
   }
 
   // Validate teacher is within school premises
-  const { valid, distance } = isWithinSchoolRadius(dto.latitude, dto.longitude)
-
-  if (!valid) {
-    throw new Error(
-      `Check-in rejected. You are ${distance}m from school. Must be within ${SCHOOL_RADIUS_METRES}m`
-    )
-  }
-
-  // Confirm teacher has lessons scheduled today
-  const hasLessonsToday = await prisma.timetable.findFirst({
-    where: { teacherId, day },
+  const school = await prisma.school.findUnique({
+    where: { id: teacher.schoolId },
+    select: { latitude: true, longitude: true, radiusMetres: true },
   })
 
-  if (!hasLessonsToday) {
-    throw new Error(`You have no lessons scheduled for ${day}`)
+  if (!school) {
+    throw new Error('School configuration not found')
+  }
+
+  // Check against AllowedLocations first; fall back to school coords if none configured
+  const allowedLocations = await prisma.allowedLocation.findMany({
+    where: { schoolId: teacher.schoolId, isActive: true },
+  })
+
+  let distance = 0
+  let locationName = 'school'
+
+  if (allowedLocations.length > 0) {
+    // Find the closest allowed location
+    let nearest = { distance: Infinity, name: '' }
+    let withinAny = false
+
+    for (const loc of allowedLocations) {
+      const d = haversineDistance(dto.latitude, dto.longitude, loc.latitude, loc.longitude)
+      if (d <= loc.radiusMetres) {
+        withinAny = true
+        distance = d
+        locationName = loc.name
+        break
+      }
+      if (d < nearest.distance) {
+        nearest = { distance: d, name: loc.name }
+      }
+    }
+
+    if (!withinAny) {
+      throw new Error(
+        `Check-in rejected. You are ${nearest.distance.toFixed(0)}m from ${nearest.name}. You must be within an allowed school location`
+      )
+    }
+  } else {
+    // No AllowedLocations configured — use school centre point
+    distance = haversineDistance(dto.latitude, dto.longitude, school.latitude, school.longitude)
+    locationName = 'school'
+
+    if (distance > school.radiusMetres) {
+      throw new Error(
+        `Check-in rejected. You are ${distance.toFixed(0)}m from school. Must be within ${school.radiusMetres}m`
+      )
+    }
   }
 
   // Determine PRESENT or LATE

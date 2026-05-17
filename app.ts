@@ -16,6 +16,8 @@ import lessonRoutes from "./src/routes/lesson.route.js";
 import substituteRoutes from "./src/routes/substitute.route.js";
 import reportRoutes from "./src/routes/report.route.js";
 import settingsRoutes from "./src/routes/settings.route.js";
+import locationVerificationRoutes from "./src/routes/location-verification.route.js";
+import systemRoutes from "./src/routes/system.route.js";
 import * as SchoolController from "./src/controllers/school.controller.js";
 import publicRoutes from "./src/routes/public.route.js";
 import prisma from "./src/config/prisma.js";
@@ -89,11 +91,13 @@ app.use("/api/schools",     schoolRoutes);
 app.use("/api/holidays",    holidayRoutes);
 app.use("/api/leaves",      leaveRoutes);  // Changed from /api/leave to /api/leaves
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/timetable",   timetableRoutes);
+app.use("/api/timetables",  timetableRoutes);  // Changed from /api/timetable to /api/timetables
 app.use("/api/lessons",     lessonRoutes);
 app.use("/api/substitutes", substituteRoutes);
 app.use("/api/reports",     reportRoutes);
 app.use("/api/settings",    settingsRoutes);
+app.use("/api/location-verifications", locationVerificationRoutes);
+app.use("/api/system",                systemRoutes);
 
 //404 Handler
 app.use((_req: Request, res: Response) => {

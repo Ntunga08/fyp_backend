@@ -5,7 +5,7 @@ import type {
   ChangePasswordDTO,
 } from '../types/settings.types.js'
 
-// ─── GET /api/settings/profile ────────────────────────────────────────────────
+// GET /api/settings/profile 
 // Get current user's profile
 
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
@@ -25,7 +25,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
-// ─── PUT /api/settings/profile ────────────────────────────────────────────────
+// PUT /api/settings/profile 
 // Update profile information
 
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
@@ -128,7 +128,7 @@ export const deactivateAccount = async (req: Request, res: Response): Promise<vo
   }
 }
 
-// ─── Helper Functions ─────────────────────────────────────────────────────────
+// Helper Functions 
 
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 import { FaceVerificationStatus } from '@prisma/client'
-import * as FaceVerificationService from '../services/face-verification.service'
+import * as FaceVerificationService from '../services/verification.service'
 import {
   TriggerVerificationDTO,
   SubmitVerificationDTO,
   FaceVerificationFilters,
-} from '../types/face-verification.types'
+} from '../types/verification.types'
 
 // ─── POST /api/face-verifications ─────────────────────────────────────────────
 // Admin triggers a verification request for a lesson

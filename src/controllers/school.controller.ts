@@ -2,8 +2,7 @@ import type { Request, Response } from 'express'
 import * as SchoolService from '../services/school.service.js'
 import type { CreateSchoolDTO, UpdateSchoolDTO, SchoolFilters } from '../types/school.types.js'
 
-// ─── POST /api/schools ────────────────────────────────────────────────────────
-
+//  POST /api/schools 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const dto: CreateSchoolDTO = req.body
@@ -32,7 +31,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/schools ─────────────────────────────────────────────────────────
+// GET /api/schools 
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -60,7 +59,7 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/schools/my ─────────────────────────────────────────────────────
+// GET /api/schools/my 
 // Any logged-in user: see their own school details
 
 export const getMySchool = async (req: Request, res: Response): Promise<void> => {
@@ -74,7 +73,7 @@ export const getMySchool = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
-// ─── GET /api/schools/:id/stats ───────────────────────────────────────────────
+// GET /api/schools/:id/stats 
 
 export const getStats = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -88,7 +87,7 @@ export const getStats = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/schools/:id ─────────────────────────────────────────────────────
+//  GET /api/schools/:id 
 
 export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -102,7 +101,7 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── PUT /api/schools/:id ─────────────────────────────────────────────────────
+// PUT /api/schools/:id 
 
 export const update = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -125,7 +124,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── PUT /api/schools/:id/deactivate ─────────────────────────────────────────
+//  PUT /api/schools/:id/deactivate5
 
 export const deactivate = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -141,7 +140,7 @@ export const deactivate = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
-// ─── PUT /api/schools/:id/reactivate ─────────────────────────────────────────
+// PUT /api/schools/:id/reactivate 
 
 export const reactivate = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -159,7 +158,7 @@ export const reactivate = async (req: Request, res: Response): Promise<void> => 
 }
 
 
-// ─── GET /api/schools/public/list ─────────────────────────────────────────────
+// GET /api/schools/public/list
 // Public endpoint - no auth required
 
 export const getPublicSchools = async (req: Request, res: Response): Promise<void> => {

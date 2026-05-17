@@ -1,47 +1,64 @@
 services:
+
+  # PostgreSQL Database 
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres 
-      POSTGRES_PASSWORD: postgres 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: edutrack
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d edutrack"]
+      interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - edutrack_network
 
+  #  Node.js Backend
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/edutrack
       JWT_SECRET: "0d36cbd7231efdde5809df711e4ea4c5544d3ccd32bc8d43bb907fa0189cd3b8"
+      PORT: 3000
+      NODE_ENV: development
       SCHOOL_LAT: -6.771246975220776
       SCHOOL_LNG: 39.2405926971738
       SCHOOL_RADIUS_METERS: 2000
+      SMTP_ENABLED: "false"
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_SECURE: "false"
+      SMTP_USER: ""
+      SMTP_PASS: ""
+      EMAIL_FROM: "EduTrack <noreply@edutrack.tz>"
+      APP_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "3000:3000"
-    command: pnpm exec tsx server.ts
+    command: >
+      sh -c "pnpm exec prisma generate &&
+             pnpm exec prisma migrate deploy &&
+             pnpm exec tsx server.ts"
+    networks:
+      - edutrack_network
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
 
 volumes:
   pgdata:
+
+
+networks:
+  edutrack_network:
+    driver: bridge

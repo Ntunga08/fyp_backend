@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import * as ReportService from '../services/report.service.js'
 
-// ─── GET /api/reports/daily?date=2025-05-10 ───────────────────────────────────
+// GET /api/reports/daily?date=2025-05-10 
 
 export const daily = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -19,7 +19,7 @@ export const daily = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/reports/weekly?startDate=2025-05-05&endDate=2025-05-09 ──────────
+// GET /api/reports/weekly?startDate=2025-05-05&endDate=2025-05-09 
 
 export const weekly = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -44,7 +44,7 @@ export const weekly = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/reports/monthly?startDate=2025-05-01&endDate=2025-05-31 ─────────
+// GET /api/reports/monthly?startDate=2025-05-01&endDate=2025-05-31 
 
 export const monthly = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -69,7 +69,7 @@ export const monthly = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/reports/teacher?teacherId=1&startDate=&endDate= ────────────────
+// GET /api/reports/teacher?teacherId=1&startDate=&endDate= 
 
 export const teacherPerformance = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -96,7 +96,7 @@ export const teacherPerformance = async (req: Request, res: Response): Promise<v
   }
 }
 
-// ─── GET /api/reports/inconsistencies?date=2025-05-10 ────────────────────────
+//  GET /api/reports/inconsistencies?date=2025-05-10 
 
 export const inconsistencies = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -116,7 +116,7 @@ export const inconsistencies = async (req: Request, res: Response): Promise<void
   }
 }
 
-// ─── GET /api/reports/my?startDate=&endDate= ─────────────────────────────────
+// GET /api/reports/my?startDate=&endDate= 
 // Teacher: own performance report
 
 export const myReport = async (req: Request, res: Response): Promise<void> => {

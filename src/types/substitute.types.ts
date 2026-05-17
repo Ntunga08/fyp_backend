@@ -1,50 +1,53 @@
-//Request Bodies 
+// ─── Request Bodies ───────────────────────────────────────────────────────────
 
 export interface AssignSubstituteDTO {
-  lessonId:           number
+  lessonId:            number
   substituteTeacherId: number
-  reason?:            string
+  reason?:             string
 }
 
 export interface RecordSubstituteLessonDTO {
   notes?: string
 }
 
-//Query Filters 
+// ─── Query Filters ────────────────────────────────────────────────────────────
+
 export interface SubstituteFilters {
   originalTeacherId?:   number
   substituteTeacherId?: number
+  schoolId?:            number
   date?:                string
   startDate?:           string
   endDate?:             string
 }
 
-// Response 
+// ─── Response ─────────────────────────────────────────────────────────────────
+
+export interface SubstituteTeacherInfo {
+  id:    number
+  name:  string
+  email: string
+}
+
+export interface SubstituteLessonInfo {
+  id:           number
+  subject:      string
+  className:    string
+  day:          string
+  startTime:    string
+  endTime:      string
+  room:         string
+  lessonStatus: string
+  notes:        string | null
+}
+
 export interface SubstituteResponse {
-  id:        number
-  date:      Date
-  reason:    string | null
-  createdAt: Date
-  originalTeacher: {
-    id:    number
-    name:  string
-    email: string
-  }
-  substituteTeacher: {
-    id:    number
-    name:  string
-    email: string
-  }
-  lesson: {
-    id:      number
-    status:  string
-    notes:   string | null
-    timetable: {
-      subject:  string
-      class:    string
-      day:      string
-      timeSlot: string
-      room:     string | null
-    }
-  }
+  id:          number
+  date:        string                // "YYYY-MM-DD"
+  summary:     string                // "David Mwita covering for Hashim Juma"
+  coveringFor: SubstituteTeacherInfo // original teacher who is absent
+  coveredBy:   SubstituteTeacherInfo // substitute doing the covering
+  lesson:      SubstituteLessonInfo
+  reason:      string | null
+  createdAt:   string
 }

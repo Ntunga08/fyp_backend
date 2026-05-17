@@ -3,7 +3,7 @@ import { NotificationType } from '@prisma/client'
 import * as NotificationService from '../services/notification.service.js'
 import type { NotificationFilters } from '../types/notification.types.js'
 
-// ─── GET /api/notifications ───────────────────────────────────────────────────
+// GET /api/notifications
 // Logged-in user: get their notifications
 
 export const getMyNotifications = async (req: Request, res: Response): Promise<void> => {
@@ -28,7 +28,7 @@ export const getMyNotifications = async (req: Request, res: Response): Promise<v
   }
 }
 
-// ─── GET /api/notifications/summary ──────────────────────────────────────────
+// GET /api/notifications/summary 
 // Returns unread count — used for notification bell in UI
 
 export const getSummary = async (req: Request, res: Response): Promise<void> => {
@@ -42,7 +42,7 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
-// ─── PUT /api/notifications/:id/read ─────────────────────────────────────────
+// PUT /api/notifications/:id/read 
 // Mark one notification as read
 
 export const markOneRead = async (req: Request, res: Response): Promise<void> => {
@@ -68,7 +68,7 @@ export const markOneRead = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
-// ─── PUT /api/notifications/read-all ─────────────────────────────────────────
+//  PUT /api/notifications/read-all 
 // Mark all as read
 
 export const markAllRead = async (req: Request, res: Response): Promise<void> => {
@@ -88,7 +88,7 @@ export const markAllRead = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
-// ─── DELETE /api/notifications/:id ───────────────────────────────────────────
+//  DELETE /api/notifications/:id 
 // Delete one notification
 
 export const deleteOne = async (req: Request, res: Response): Promise<void> => {
@@ -112,7 +112,7 @@ export const deleteOne = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── DELETE /api/notifications/clear-read ────────────────────────────────────
+//  DELETE /api/notifications/clear-read 
 // Clear all read notifications
 
 export const clearRead = async (req: Request, res: Response): Promise<void> => {
@@ -132,7 +132,7 @@ export const clearRead = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/notifications/all ──────────────────────────────────────────────
+//  GET /api/notifications/all 
 // Admin: view all notifications across users
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -140,10 +140,11 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
     const { userId, type, isRead } = req.query
 
     const notifications = await NotificationService.getAll({
-      userId: userId ? Number(userId) : undefined,
-      type:   type   as string | undefined,
+        userId: userId ? Number(userId) : undefined,
+         type:   type   as string | undefined,
       isRead: isRead !== undefined ? isRead === 'true' : undefined,
     })
+
 
     res.status(200).json({
       success: true,

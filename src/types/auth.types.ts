@@ -19,9 +19,10 @@ export interface LoginDTO {
 // JWT Payload 
 
 export interface JwtPayload {
-  userId: number
-  email: string
-  role: Role
+  userId:   number
+  email:    string
+  role:     Role
+  schoolId: number | null
 }
 
 //Responses

@@ -7,7 +7,7 @@ const router: Router = Router()
 // All routes require authentication
 router.use(requireAuth)
 
-// ─── Teacher routes ───────────────────────────────────────────────────────────
+//  Teacher routes 
 
 // Record a conducted lesson
 router.post('/', requireRole('TEACHER'), LessonController.recordLesson)
@@ -21,7 +21,7 @@ router.get('/my', requireRole('TEACHER'), LessonController.getMyLessons)
 // Update own lesson notes
 router.put('/:id', requireRole('TEACHER', 'ADMIN'), LessonController.update)
 
-// ─── Admin / Principal routes ─────────────────────────────────────────────────
+// Admin / Principal routes 
 
 // View all lessons (filterable)
 router.get('/', requireRole('ADMIN', 'PRINCIPAL'), LessonController.getAll)

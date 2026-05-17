@@ -17,7 +17,7 @@ export interface FaceVerificationResult {
   reason?:    string
 }
 
-// ─── Main verify function (swap this for real provider) ───────────────────────
+// Main verify function (swap this for real provider)
 
 export const verifyFace = async (
   imageBase64: string,
@@ -30,11 +30,11 @@ export const verifyFace = async (
     throw new Error('Face verification provider not configured for production')
   }
 
-  // ── Development / Test simulation ─────────────────────────────────────────
+  // Development / Test simulation 
   return simulateVerification(imageBase64)
 }
 
-// ─── Simulated verification for dev/testing ───────────────────────────────────
+//  Simulated verification for dev/testing 
 
 const simulateVerification = (imageBase64: string): FaceVerificationResult => {
   if (!imageBase64 || imageBase64.length < 10) {

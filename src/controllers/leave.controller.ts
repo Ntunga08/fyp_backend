@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import * as LeaveService from '../services/leave.service.js'
 import type { CreateLeaveDTO, ReviewLeaveDTO, LeaveFilters } from '../types/leave.types.js'
 
-// ─── POST /api/leave ──────────────────────────────────────────────────────────
+//  POST /api/leave 
 // Teacher applies for leave
 
 export const apply = async (req: Request, res: Response): Promise<void> => {
@@ -34,7 +34,7 @@ export const apply = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/leave/my ────────────────────────────────────────────────────────
+// GET /api/leave/my 
 // Teacher: own leave history
 
 export const getMyLeaves = async (req: Request, res: Response): Promise<void> => {
@@ -64,7 +64,7 @@ export const getMyLeaves = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
-// ─── GET /api/leave ───────────────────────────────────────────────────────────
+//  GET /api/leave 
 // Admin/Principal: all leave requests
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -100,7 +100,7 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── GET /api/leave/pending ───────────────────────────────────────────────────
+//  GET /api/leave/pending 
 // Admin/Principal: pending leave requests only
 
 export const getPending = async (req: Request, res: Response): Promise<void> => {
@@ -114,7 +114,7 @@ export const getPending = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
-// ─── GET /api/leave/:id ───────────────────────────────────────────────────────
+//  GET /api/leave/:id 
 
 export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -128,7 +128,7 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── PUT /api/leave/:id/approve ───────────────────────────────────────────────
+//  PUT /api/leave/:id/approve 
 // Admin/Principal approves leave
 
 export const approve = async (req: Request, res: Response): Promise<void> => {
@@ -153,7 +153,7 @@ export const approve = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── PUT /api/leave/:id/reject ────────────────────────────────────────────────
+//  PUT /api/leave/:id/reject 
 // Admin/Principal rejects leave
 
 export const reject = async (req: Request, res: Response): Promise<void> => {
@@ -178,7 +178,7 @@ export const reject = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// ─── DELETE /api/leave/:id ────────────────────────────────────────────────────
+//  DELETE /api/leave/:id 
 // Teacher cancels their own PENDING request
 
 export const cancel = async (req: Request, res: Response): Promise<void> => {

@@ -1,162 +1,160 @@
 import type { Request, Response } from 'express'
 import { Day } from '@prisma/client'
-import * as TimetableService from '../services/timetable.service'
-import type { CreateTimetableDTO, UpdateTimetableDTO } from '../types/timetable.types'
+import * as TimetableService from '../services/timetable.service.js'
+import type { CreateTimetableDTO, UpdateTimetableDTO } from '../types/timetable.types.js'
 
-// POST /api/timetable 
+const VALID_DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
+
+// ─── POST /api/timetables ─────────────────────────────────────────────────────
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const dto: CreateTimetableDTO = req.body
-    const slot = await TimetableService.create(dto)
 
-    res.status(201).json({
-      success: true,
-      message: 'Timetable slot created successfully',
-      data: slot,
-    })
+    if (!dto.subject || !dto.className || !dto.day || !dto.startTime || !dto.endTime) {
+      res.status(400).json({ success: false, message: 'subject, className, day, startTime, and endTime are required' })
+      return
+    }
+
+    if (!dto.teacherId && !dto.teacher) {
+      res.status(400).json({ success: false, message: 'Either teacherId or teacher name is required' })
+      return
+    }
+
+    const slot = await TimetableService.create(dto)
+    res.status(201).json({ success: true, data: slot })
   } catch (error: any) {
     const isConflict = error.message.includes('already has a class')
-    res.status(isConflict ? 409 : 400).json({
-      success: false,
-      message: error.message,
-    })
+    res.status(isConflict ? 409 : 400).json({ success: false, message: error.message })
   }
 }
 
-//GET /api/timetable
-// Admin/Principal: all slots, optionally filtered by ?teacherId, ?day, ?class
+// ─── GET /api/timetables ──────────────────────────────────────────────────────
+// Admin/Principal: all slots in their school, filterable by ?day=&className=&teacherId=
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { teacherId, day, class: cls } = req.query
-    const filters: { teacherId?: number; day?: Day; class?: string } = {}
+    const { className, day, teacherId } = req.query
+    const schoolId = req.user!.schoolId
 
-    if (teacherId !== undefined) {
-      const parsedTeacherId = Number(teacherId)
-      if (!Number.isNaN(parsedTeacherId)) {
-        filters.teacherId = parsedTeacherId
-      }
-    }
-
-    if (day !== undefined && typeof day === 'string') {
-      filters.day = day.toUpperCase() as Day
-    }
-
-    if (cls !== undefined && typeof cls === 'string') {
-      filters.class = cls
-    }
+    const filters: any = {}
+    if (schoolId  !== undefined) filters.schoolId  = schoolId
+    if (className !== undefined && typeof className === 'string') filters.className = className
+    if (day       !== undefined && typeof day === 'string')       filters.day       = day.toUpperCase() as Day
+    if (teacherId !== undefined)                                  filters.teacherId = Number(teacherId)
 
     const slots = await TimetableService.getAll(filters)
-
-    res.status(200).json({
-      success: true,
-      count: slots.length,
-      data: slots,
-    })
+    res.status(200).json({ success: true, count: slots.length, data: slots })
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message })
   }
 }
 
-// GET /api/timetable/my 
+// ─── GET /api/timetables/my-schedule ─────────────────────────────────────────
+// Teacher: own timetable — ?grouped=true for day-grouped view with summary
 
-export const getMyTimetable = async (req: Request, res: Response): Promise<void> => {
+export const getMySchedule = async (req: Request, res: Response): Promise<void> => {
   try {
     const teacherId = req.user!.userId
-    const slots = await TimetableService.getMyTimetable(teacherId)
+    const grouped   = req.query.grouped === 'true'
 
-    res.status(200).json({
-      success: true,
-      count: slots.length,
-      data: slots,
-    })
+    if (grouped) {
+      const schedule = await TimetableService.getMyScheduleGrouped(teacherId)
+      res.status(200).json({ success: true, data: schedule })
+    } else {
+      const slots = await TimetableService.getMyTimetable(teacherId)
+      res.status(200).json({ success: true, count: slots.length, data: slots })
+    }
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message })
   }
 }
 
-//  GET /api/timetable/day/:day
-// Teacher: their schedule for a specific day (used during check-in)
+// ─── GET /api/timetables/school ───────────────────────────────────────────────
+// Any authenticated user in the school: school-wide timetable
+// Filterable by ?day=MONDAY&className=Form+3A
+
+export const getSchoolTimetable = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const schoolId = req.user!.schoolId
+
+    if (!schoolId) {
+      res.status(403).json({ success: false, message: 'No school associated with your account' })
+      return
+    }
+
+    const dayParam       = req.query.day as string | undefined
+    const classNameParam = req.query.className as string | undefined
+
+    let day: Day | undefined
+    if (dayParam) {
+      const upper = dayParam.toUpperCase()
+      if (!VALID_DAYS.includes(upper)) {
+        res.status(400).json({ success: false, message: `Invalid day. Use: ${VALID_DAYS.join(', ')}` })
+        return
+      }
+      day = upper as Day
+    }
+
+    const result = await TimetableService.getSchoolTimetable(schoolId, day, classNameParam)
+    res.status(200).json({ success: true, data: result })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+// ─── GET /api/timetables/day/:day ────────────────────────────────────────────
+// Teacher: own schedule for a specific day
 
 export const getByDay = async (req: Request, res: Response): Promise<void> => {
   try {
     const teacherId = req.user!.userId
-    const dayParam = req.params.day
+    const day       = (req.params.day as string).toUpperCase() as Day
 
-    if (typeof dayParam !== 'string') {
-      res.status(400).json({ success: false, message: 'Invalid day provided' })
-      return
-    }
-
-    const day = dayParam.toUpperCase() as Day
-
-    const validDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']
-    if (!validDays.includes(day)) {
+    if (!VALID_DAYS.includes(day)) {
       res.status(400).json({ success: false, message: 'Invalid day provided' })
       return
     }
 
     const slots = await TimetableService.getByDay(teacherId, day)
-
-    res.status(200).json({
-      success: true,
-      count: slots.length,
-      data: slots,
-    })
+    res.status(200).json({ success: true, count: slots.length, data: slots })
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message })
   }
 }
 
-// GET /api/timetable/:id 
+// ─── GET /api/timetables/:id ──────────────────────────────────────────────────
 
 export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = Number(req.params.id)
-    const slot = await TimetableService.getById(id)
-
+    const slot = await TimetableService.getById(Number(req.params.id))
     res.status(200).json({ success: true, data: slot })
   } catch (error: any) {
-    const notFound = error.message.includes('not found')
-    res.status(notFound ? 404 : 500).json({ success: false, message: error.message })
+    res.status(error.message.includes('not found') ? 404 : 500).json({ success: false, message: error.message })
   }
 }
 
-// PUT /api/timetable/:id 
+// ─── PUT /api/timetables/:id ──────────────────────────────────────────────────
+
 export const update = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = Number(req.params.id)
     const dto: UpdateTimetableDTO = req.body
-
-    const updated = await TimetableService.update(id, dto)
-
-    res.status(200).json({
-      success: true,
-      message: 'Timetable slot updated successfully',
-      data: updated,
-    })
+    const updated = await TimetableService.update(Number(req.params.id), dto)
+    res.status(200).json({ success: true, data: updated })
   } catch (error: any) {
-    const notFound  = error.message.includes('not found')
+    const notFound   = error.message.includes('not found')
     const isConflict = error.message.includes('already has a class')
-    const status = notFound ? 404 : isConflict ? 409 : 400
-
-    res.status(status).json({ success: false, message: error.message })
+    res.status(notFound ? 404 : isConflict ? 409 : 400).json({ success: false, message: error.message })
   }
 }
 
-// DELETE /api/timetable/:id 
+// ─── DELETE /api/timetables/:id ───────────────────────────────────────────────
+
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = Number(req.params.id)
-    await TimetableService.remove(id)
-
-    res.status(200).json({
-      success: true,
-      message: 'Timetable slot deleted successfully',
-    })
+    await TimetableService.remove(Number(req.params.id))
+    res.status(200).json({ success: true, message: 'Deleted successfully' })
   } catch (error: any) {
-    const notFound = error.message.includes('not found')
-    res.status(notFound ? 404 : 500).json({ success: false, message: error.message })
+    res.status(error.message.includes('not found') ? 404 : 500).json({ success: false, message: error.message })
   }
 }

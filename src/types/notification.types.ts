@@ -1,7 +1,6 @@
 import { NotificationType } from '@prisma/client'
 
-// ─── Internal use (called from other services) ────────────────────────────────
-
+// Internal use (called from other services)
 export interface CreateNotificationDTO {
   userId:  number
   type:    NotificationType
@@ -9,15 +8,14 @@ export interface CreateNotificationDTO {
   message: string
 }
 
-// ─── Query Filters ────────────────────────────────────────────────────────────
+//  Query Filters 
 
 export interface NotificationFilters {
   isRead?: boolean
   type?:   NotificationType
 }
 
-// ─── Response ─────────────────────────────────────────────────────────────────
-
+//  Response 
 export interface NotificationResponse {
   id:        number
   type:      NotificationType
@@ -27,7 +25,7 @@ export interface NotificationResponse {
   createdAt: Date
 }
 
-// ─── Summary ──────────────────────────────────────────────────────────────────
+// Summary
 
 export interface NotificationSummary {
   total:   number

@@ -36,7 +36,7 @@ router.get(
   HolidayController.getById
 )
 
-// ─── Admin only ───────────────────────────────────────────────────────────────
+//  Admin only 
 
 // Create single holiday
 router.post(

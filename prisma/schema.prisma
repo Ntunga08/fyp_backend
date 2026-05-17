@@ -12,6 +12,7 @@
 	  TEACHER
 	  PRINCIPAL
 	  ADMIN
+	  SUPER_ADMIN
 	}
 
 	enum UserStatus {
@@ -42,6 +43,12 @@
 	}
 
 	enum FaceVerificationStatus {
+	  PENDING
+	  VERIFIED
+	  FAILED
+	}
+
+	enum LocationVerificationStatus {
 	  PENDING
 	  VERIFIED
 	  FAILED
@@ -89,7 +96,7 @@
 
 	model User {
 	  id        Int        @id @default(autoincrement())
-	  schoolId  Int
+	  schoolId  Int?
 	  name      String
 	  email     String     @unique
 	  password  String
@@ -100,17 +107,18 @@
 	  createdAt DateTime   @default(now())
 	  updatedAt DateTime   @updatedAt
 
-	  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+	  school School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
 	  timetables            Timetable[]
 	  attendances           Attendance[]
 	  lessons               Lesson[]
-	  substitutesAsOriginal Substitute[]      @relation("OriginalTeacher")
-	  substitutesAsCover    Substitute[]      @relation("SubstituteTeacher")
+	  substitutesAsOriginal Substitute[]           @relation("OriginalTeacher")
+	  substitutesAsCover    Substitute[]           @relation("SubstituteTeacher")
 	  faceVerifications     FaceVerification[]
+	  locationVerifications LocationVerification[]
 	  faceProfile           FaceProfile?
-	  leaveRequests         LeaveRequest[]    @relation("TeacherLeaves")
-	  leaveReviews          LeaveRequest[]    @relation("LeaveReviewer")
+	  leaveRequests         LeaveRequest[]         @relation("TeacherLeaves")
+	  leaveReviews          LeaveRequest[]         @relation("LeaveReviewer")
 	  notifications         Notification[]
 	  auditLogs             AuditLog[]
 
@@ -168,10 +176,11 @@
 	  createdAt   DateTime     @default(now())
 	  updatedAt   DateTime     @updatedAt
 
-	  teacher          User              @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-	  timetable        Timetable         @relation(fields: [timetableId], references: [id], onDelete: Cascade)
-	  substitute       Substitute?
-	  faceVerification FaceVerification?
+	  teacher              User                  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+	  timetable            Timetable             @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+	  substitute           Substitute?
+	  faceVerification     FaceVerification?
+	  locationVerification LocationVerification?
 
 	  @@unique([timetableId, date])
 	  @@map("lessons")
@@ -294,3 +303,42 @@
 
 	  @@map("audit_logs")
 	}
+
+// ─── AllowedLocation ──────────────────────────────────────────────────────────
+
+model AllowedLocation {
+  id           Int      @id @default(autoincrement())
+  schoolId     Int
+  name         String   // e.g. "Main Campus", "Science Block", "Sports Field"
+  latitude     Float
+  longitude    Float
+  radiusMetres Int      @default(100)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  locationVerifications LocationVerification[]
+
+  @@map("allowed_locations")
+}
+
+// ─── LocationVerification ─────────────────────────────────────────────────────
+
+model LocationVerification {
+  id                Int                        @id @default(autoincrement())
+  teacherId         Int
+  lessonId          Int                        @unique
+  allowedLocationId Int?
+  submittedLat      Float?
+  submittedLng      Float?
+  distanceMetres    Float?
+  status            LocationVerificationStatus @default(PENDING)
+  verifiedAt        DateTime?
+  createdAt         DateTime                   @default(now())
+
+  teacher          User             @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  lesson           Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  allowedLocation  AllowedLocation? @relation(fields: [allowedLocationId], references: [id])
+
+  @@map("location_verifications")
+}

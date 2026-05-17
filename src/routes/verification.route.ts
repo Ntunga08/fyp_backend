@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import * as FaceVerificationController from '../controllers/face-verification.controller'
+import * as FaceVerificationController from '../controllers/verification.controller'
 import { requireAuth, requireRole } from '../middleware/auth.middleware'
 
 const router = Router()

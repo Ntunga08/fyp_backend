@@ -16,8 +16,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    // schoolId is required for TEACHER and PRINCIPAL, but optional for ADMIN
-    if (dto.role !== 'ADMIN' && dto.schoolId === undefined) {
+    // SUPER_ADMIN has no school; TEACHER and PRINCIPAL require one
+    if ((dto.role as string) !== 'SUPER_ADMIN' && dto.role !== 'ADMIN' && dto.schoolId === undefined) {
       res.status(400).json({
         success: false,
         message: 'schoolId is required for teachers and principals',
@@ -26,7 +26,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const result = await AuthService.register(dto)
-
     res.status(201).json({
       success: true,
       message: 'Account created successfully',
@@ -158,7 +157,7 @@ export const rejectUser = async (req: Request, res: Response): Promise<void> => 
 export const getSchoolUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = (req as any).user
-    const { status } = req.query
+    const { status, role } = req.query
     
     // Get user's school
     const currentUser = await AuthService.getMe(user.userId)
@@ -173,7 +172,8 @@ export const getSchoolUsers = async (req: Request, res: Response): Promise<void>
 
     const users = await AuthService.getSchoolUsers(
       currentUser.schoolId,
-      status as string | undefined
+      status as string | undefined,
+      role as string | undefined
     )
 
     res.status(200).json({

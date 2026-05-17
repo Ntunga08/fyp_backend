@@ -8,9 +8,10 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        userId: number
-        email: string
-        role: Role
+        userId:   number
+        email:    string
+        role:     Role
+        schoolId: number | null
       }
     }
   }
@@ -55,7 +56,7 @@ export const requireAuth = (
   }
 }
 
-// ─── requireRole: restricts route to specific roles ──────────────────────────
+// requireRole: restricts route to specific roles 
 // Usage: requireRole('ADMIN') or requireRole('ADMIN', 'PRINCIPAL')
 
 export const requireRole = (...roles: Role[]) => {

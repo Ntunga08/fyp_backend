@@ -18,6 +18,7 @@ router.post('/login', AuthController.login)
 router.get('/me', requireAuth, AuthController.getMe)
 router.get('/pending', requireAuth, AuthController.getPendingUsers)
 router.get('/school-users', requireAuth, AuthController.getSchoolUsers)
+router.get('/users', requireAuth, AuthController.getSchoolUsers)  // Alias for frontend compatibility
 router.put('/approve/:userId', requireAuth, AuthController.approveUser)
 router.put('/reject/:userId', requireAuth, AuthController.rejectUser)
 

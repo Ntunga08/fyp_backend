@@ -8,7 +8,7 @@ import type {
 
 const db = prisma as any
 
-// ─── Shared include ───────────────────────────────────────────────────────────
+// Shared include 
 
 const holidayInclude = {
   school: {
@@ -16,7 +16,7 @@ const holidayInclude = {
   },
 }
 
-// ─── Create holiday ───────────────────────────────────────────────────────────
+// Create holiday 
 
 export const create = async (dto: CreateHolidayDTO): Promise<HolidayResponse> => {
   const date = new Date(dto.date)
@@ -58,8 +58,7 @@ export const create = async (dto: CreateHolidayDTO): Promise<HolidayResponse> =>
   return holiday as HolidayResponse
 }
 
-// ─── Get all holidays ─────────────────────────────────────────────────────────
-
+// Get all holidays
 export const getAll = async (filters: HolidayFilters): Promise<HolidayResponse[]> => {
   const where: any = {}
 

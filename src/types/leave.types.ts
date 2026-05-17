@@ -1,6 +1,6 @@
 import { LeaveStatus } from '@prisma/client'
 
-// ─── Request Bodies ───────────────────────────────────────────────────────────
+// Request Bodies 
 
 export interface CreateLeaveDTO {
   startDate: string   // ISO date e.g. "2025-05-10"
@@ -12,7 +12,7 @@ export interface ReviewLeaveDTO {
   reviewNote?: string
 }
 
-// ─── Query Filters ────────────────────────────────────────────────────────────
+// Query Filters 
 
 export interface LeaveFilters {
   teacherId?:  number
@@ -21,7 +21,7 @@ export interface LeaveFilters {
   endDate?:    string
 }
 
-// ─── Response ─────────────────────────────────────────────────────────────────
+// Response 
 
 export interface LeaveResponse {
   id:         number

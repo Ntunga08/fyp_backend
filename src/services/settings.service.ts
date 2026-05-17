@@ -6,7 +6,7 @@ import type {
   ProfileResponse,
 } from '../types/settings.types.js'
 
-// ─── Get User Profile ─────────────────────────────────────────────────────────
+// Get User Profile 
 
 export const getProfile = async (userId: number): Promise<ProfileResponse> => {
   const user = await prisma.user.findUnique({
@@ -38,7 +38,7 @@ export const getProfile = async (userId: number): Promise<ProfileResponse> => {
   return user as ProfileResponse
 }
 
-// ─── Update Profile Information ───────────────────────────────────────────────
+//  Update Profile Information
 
 export const updateProfile = async (
   userId: number,
@@ -95,7 +95,7 @@ export const updateProfile = async (
   return updated as ProfileResponse
 }
 
-// ─── Change Password ──────────────────────────────────────────────────────────
+//  Change Password 
 
 export const changePassword = async (
   userId: number,
@@ -142,7 +142,7 @@ export const changePassword = async (
   })
 }
 
-// ─── Deactivate Account ───────────────────────────────────────────────────────
+// Deactivate Account 
 
 export const deactivateAccount = async (userId: number): Promise<void> => {
   const user = await prisma.user.findUnique({

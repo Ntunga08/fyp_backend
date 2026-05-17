@@ -7,7 +7,7 @@ const router: Router = Router()
 // All routes require authentication
 router.use(requireAuth)
 
-// ─── Teacher routes ───────────────────────────────────────────────────────────
+// Teacher routes 
 
 // Apply for leave
 router.post(
@@ -17,11 +17,8 @@ router.post(
 )
 
 // View own leave history
-router.get(
-  '/my',
-  requireRole('TEACHER'),
-  LeaveController.getMyLeaves
-)
+router.get('/my',          requireRole('TEACHER'), LeaveController.getMyLeaves)
+router.get('/my-requests', requireRole('TEACHER'), LeaveController.getMyLeaves)
 
 // Cancel own PENDING leave request
 router.delete(
@@ -30,7 +27,7 @@ router.delete(
   LeaveController.cancel
 )
 
-// ─── Admin / Principal routes ─────────────────────────────────────────────────
+// Admin / Principal routes 
 
 // View pending leave requests only (must be before /:id)
 router.get(
@@ -59,9 +56,19 @@ router.put(
   requireRole('ADMIN', 'PRINCIPAL'),
   LeaveController.approve
 )
+router.post(
+  '/:id/approve',
+  requireRole('ADMIN', 'PRINCIPAL'),
+  LeaveController.approve
+)
 
 // Reject leave with optional note
 router.put(
+  '/:id/reject',
+  requireRole('ADMIN', 'PRINCIPAL'),
+  LeaveController.reject
+)
+router.post(
   '/:id/reject',
   requireRole('ADMIN', 'PRINCIPAL'),
   LeaveController.reject

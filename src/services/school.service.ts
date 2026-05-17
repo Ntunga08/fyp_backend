@@ -29,17 +29,31 @@ export const create = async (dto: CreateSchoolDTO): Promise<SchoolResponse> => {
     throw new Error('Invalid longitude. Must be between -180 and 180')
   }
 
+  const radius = dto.radiusMetres ?? 100
+
   const school = await db.school.create({
     data: {
       name:             dto.name,
       address:          dto.address          ?? null,
       latitude:         dto.latitude,
       longitude:        dto.longitude,
-      radiusMetres:     dto.radiusMetres      ?? 100,
+      radiusMetres:     radius,
       lateCutoffHour:   dto.lateCutoffHour    ?? 8,
       lateCutoffMinute: dto.lateCutoffMinute  ?? 15,
     },
     include: { _count: { select: { users: true, timetables: true, holidays: true } } },
+  })
+
+  // Auto-create the default "Main Campus" allowed location from school coords
+  await db.allowedLocation.create({
+    data: {
+      schoolId:     school.id,
+      name:         'Main Campus',
+      latitude:     dto.latitude,
+      longitude:    dto.longitude,
+      radiusMetres: radius,
+      isActive:     true,
+    },
   })
 
   return school as SchoolResponse
@@ -129,6 +143,24 @@ export const update = async (
     data:    dto,
     include: { _count: { select: { users: true, timetables: true, holidays: true } } },
   })
+
+  // Keep the auto-created "Main Campus" location in sync with school coords
+  if (dto.latitude !== undefined || dto.longitude !== undefined || dto.radiusMetres !== undefined) {
+    const mainCampus = await db.allowedLocation.findFirst({
+      where: { schoolId: id, name: 'Main Campus' },
+    })
+
+    if (mainCampus) {
+      await db.allowedLocation.update({
+        where: { id: mainCampus.id },
+        data: {
+          ...(dto.latitude     !== undefined && { latitude:     dto.latitude }),
+          ...(dto.longitude    !== undefined && { longitude:    dto.longitude }),
+          ...(dto.radiusMetres !== undefined && { radiusMetres: dto.radiusMetres }),
+        },
+      })
+    }
+  }
 
   return updated as SchoolResponse
 }

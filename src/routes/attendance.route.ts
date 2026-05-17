@@ -13,10 +13,10 @@ router.use(requireAuth)
 router.post('/checkin', requireRole('TEACHER'), AttendanceController.checkIn)
 
 // Teacher checks own status for today
-router.get('/today', requireRole('TEACHER'), AttendanceController.getMyToday)
+router.get('/today', requireRole('TEACHER', 'PRINCIPAL'), AttendanceController.getMyToday)
 
-// Teacher views own attendance history
-router.get('/my', requireRole('TEACHER'), AttendanceController.getMyHistory)
+// Teacher/Principal views own attendance history
+router.get('/my', requireRole('TEACHER', 'PRINCIPAL'), AttendanceController.getMyHistory)
 
 //Admin / Principal routes 
 // View all attendance records (filterable)

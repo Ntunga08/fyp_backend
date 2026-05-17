@@ -1,46 +1,72 @@
 import { Day } from '@prisma/client'
 
-//  Request Bodies
+// ─── Request Bodies ───────────────────────────────────────────────────────────
 
 export interface CreateTimetableDTO {
-  teacherId: number
-  subject: string
-  class: string
-  day: Day
-  timeSlot: string  // e.g. "08:00-09:00"
-  room?: string
+  teacherId?: number
+  teacher?:   string
+  subject:    string
+  className:  string
+  day:        Day
+  startTime:  string
+  endTime:    string
+  room?:      string
 }
 
 export interface UpdateTimetableDTO {
   teacherId?: number
-  subject?: string
-  class?: string
-  day?: Day
-  timeSlot?: string
-  room?: string
+  teacher?:   string
+  subject?:   string
+  className?: string
+  day?:       Day
+  startTime?: string
+  endTime?:   string
+  room?:      string
 }
 
-// Query Filters 
+// ─── Query Filters ────────────────────────────────────────────────────────────
 
 export interface TimetableFilters {
   teacherId?: number
-  day?: Day
-  class?: string
+  day?:       Day
+  className?: string
+  schoolId?:  number
 }
 
-// Response
+// ─── Flat slot (used in management and my-schedule flat list) ─────────────────
 
-export interface TimetableResponse {
-  id: number
-  subject: string
-  class: string
-  day: Day
-  timeSlot: string
-  room: string | null
-  createdAt: Date
-  teacher: {
-    id: number
-    name: string
-    email: string
-  }
+export interface TimetableSlotResponse {
+  id:        string
+  day:       Day
+  startTime: string
+  endTime:   string
+  subject:   string
+  className: string
+  teacher:   string
+  teacherId: number
+  room:      string
+}
+
+// ─── Day-grouped slot (used in schedule views) ───────────────────────────────
+
+export interface DaySlots {
+  day:   Day
+  slots: TimetableSlotResponse[]
+}
+
+// ─── My schedule response (teacher's personal view) ──────────────────────────
+
+export interface MyScheduleResponse {
+  teacherName:       string
+  subjects:          string[]
+  totalSlotsPerWeek: number
+  schedule:          DaySlots[]
+}
+
+// ─── School timetable response (general view) ─────────────────────────────────
+
+export interface SchoolTimetableResponse {
+  schoolName: string
+  filters:    { day?: string; className?: string }
+  schedule:   DaySlots[]
 }

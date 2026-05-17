@@ -30,13 +30,26 @@ import prisma from "./src/config/prisma.js";
 
 const app: Application = express();
 
-//Global Middleware 
+//Global Middleware
+const ALLOWED_ORIGINS = [
+  'https://ntunga08.github.io',   // production frontend
+  'http://localhost:5173',         // local dev (Vite)
+  'http://localhost:3001',         // local dev (alt port)
+]
+
 app.use(cors({
-  origin: '*', // Allow all origins for development
+  origin: (origin, callback) => {
+    // allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin) return callback(null, true)
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
+    const err = new Error(`CORS: origin "${origin}" is not allowed`) as any
+    err.status = 403
+    callback(err)
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -108,12 +121,14 @@ app.use((_req: Request, res: Response) => {
 });
 
 // Global Error Handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("❌ Error:", err.message);
-  res.status(500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status ?? 500
+  if (status !== 500) {
+    res.status(status).json({ success: false, message: err.message })
+    return
+  }
+  console.error("❌ Error:", err.message)
+  res.status(500).json({ success: false, message: "Internal Server Error" })
+})
 
 export default app;
